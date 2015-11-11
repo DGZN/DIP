@@ -1,0 +1,16 @@
+extends layout
+
+block content
+  h1= title
+  p Welcome to #{title}
+  ul
+    each val in traces
+      li
+        div
+          span.dip-id
+            =val.dip_id
+          span.dip-id
+            =val.dip_id
+          span.trace
+            =val.asset.name
+            =val.asset.code
