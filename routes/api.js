@@ -17,6 +17,25 @@ router.get('/dip/traces', function(req, res, next) {
   })
 });
 
+router.delete('/dip/traces/:id', function(req, res, next) {
+  Trace.remove({ _id: req.params.id }, function (err, trace) {
+    if (err)
+      return res.json({
+        status: 500
+      , error: {
+          message: err.message
+        , errors: {
+            errors: err.errors
+          }
+        }
+      })
+    Trace.find(function (err, traces) {
+      if (err) return console.error(err);
+      res.json(traces)
+    })
+  });
+});
+
 router.post('/dip/traces', function(req, res, next) {
   var trace = new Trace(req.body);
   trace.save(function (err) {

@@ -12,8 +12,15 @@ router.get('/', function(req, res, next) {
       title: 'DIP Admin Dashboard'
     , traces: traces
     });
-    console.log(require('util').inspect(traces, { depth: null }));
   })
+});
+
+/* GET home page. */
+router.get('/admin', function(req, res, next) {
+  console.log('Admin View')
+  res.render('admin', {
+    title: 'DIP Admin Dashboard'
+  });
 });
 
 module.exports = router;
