@@ -10,10 +10,15 @@ router.get('/', function(req, res, next) {
   });
 });
 
+router.get('/dip/traces', function(req, res, next) {
+  Trace.find(function (err, traces) {
+    if (err) return console.error(err);
+    res.json(traces)
+  })
+});
+
 router.post('/dip/traces', function(req, res, next) {
-
   var trace = new Trace(req.body);
-
   trace.save(function (err) {
     if (err)
       return res.json({
@@ -27,6 +32,7 @@ router.post('/dip/traces', function(req, res, next) {
       })
     return res.json({
       'route': '/dip/traces'
+    , 'method': req.method
     , 'payload': req.body
     });
   });

@@ -12,7 +12,7 @@ router.get('/', function(req, res, next) {
       title: 'DIP Admin Dashboard'
     , traces: traces
     });
-    console.log(require('util').inspect(traces, { depth: null }));
+    //console.log(require('util').inspect(traces, { depth: null }));
   })
 });
 
