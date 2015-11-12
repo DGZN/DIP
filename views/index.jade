@@ -9,11 +9,22 @@ block content
       div(class="panel panel-default")
         div(id="heading"+i class="panel-heading" role="tab")
           h4.panel-title
-          a(class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapse"+i aria-expanded="false" aria-controls="collapse"+i)= val.asset.name
+          a(class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapse"+i aria-expanded="false" aria-controls="collapse"+i)
+            if val.trace.error == "true"
+              span.text-danger ERROR
+                =" "+val.asset.name
+            else
+              =val.asset.name
           .pull-right
-            = val.trace.status + " (" + val.trace.code + ")"
+            if val.trace.error == "true"
+              span.text-danger
+                = val.trace.status + " (" + val.trace.code + ")" + " "
+            else
+              = val.trace.status + " (" + val.trace.code + ")"
         div(id="collapse"+i class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading"+i)
           .panel-body
             =val.asset.name
             .pull-right
               =val.trace.message
+              button(type="button" class="btn btn-xs btn-default" aria-label="Left Align")
+                span(class="glyphicon glyphicon glyphicon-remove" aria-hidden="true")
