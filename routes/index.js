@@ -5,22 +5,12 @@ var Trace = require('../models/trace')
 
 
 /* GET home page. */
-router.get('/', function(req, res, next) {
-  Trace.find(function (err, traces) {
-    if (err) return console.error(err);
-    res.render('index', {
-      title: 'DIP Admin Dashboard'
-    , traces: traces
-    });
-  })
+router.get('/admin', function(req, res, next) {
+  res.sendfile(__dirname + '/public/admin/');
 });
 
-/* GET home page. */
-router.get('/admin', function(req, res, next) {
-  console.log('Admin View')
-  res.render('admin', {
-    title: 'DIP Admin Dashboard'
-  });
+router.get('/admin/dashboard', function(req, res, next) {
+  res.sendfile(__dirname + '/public/admin/dashboard.html');
 });
 
 module.exports = router;
