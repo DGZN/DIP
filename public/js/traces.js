@@ -101,7 +101,7 @@ var TraceBox = React.createClass({
   },
   componentDidMount: function() {
     this.loadTracesFromServer();
-    setInterval(this.loadTracesFromServer, this.props.pollInterval);
+    // setInterval(this.loadTracesFromServer, this.props.pollInterval);
   },
   render: function() {
     return (

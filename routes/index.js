@@ -1,16 +1,19 @@
 var express = require('express');
 var router = express.Router();
-
 var Trace = require('../models/trace')
 
 
 /* GET home page. */
-router.get('/admin', function(req, res, next) {
-  res.sendfile(__dirname + '/public/admin/');
+router.get('/', function(req, res, next) {
+  res.render('admin', {
+    title: 'DIP Admin Dashboard'
+  });
 });
 
-router.get('/admin/dashboard', function(req, res, next) {
-  res.sendfile(__dirname + '/public/admin/dashboard.html');
+router.get('/menu', function(req, res, next) {
+  res.render('menu', {
+    title: 'DIP Admin Dashboard'
+  });
 });
 
 module.exports = router;

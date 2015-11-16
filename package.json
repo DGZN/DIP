@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "nodemon -e js,jade,css ./bin/www"
+    "start": "nodemon -e jade ./bin/www"
   },
   "dependencies": {
     "body-parser": "~1.13.2",
@@ -16,6 +16,11 @@
   },
   "devDependencies": {
     "cors": "^2.7.1",
-    "mongoose": "^4.2.5"
+    "fixed-data-table": "^0.6.0",
+    "mongoose": "^4.2.5",
+    "react": "^0.14.2",
+    "react-bootstrap": "^0.27.3",
+    "react-dom": "^0.14.2",
+    "slideout": "^0.1.11"
   }
 }

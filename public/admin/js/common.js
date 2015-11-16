@@ -22,27 +22,27 @@ function readyFunction(){
 
 
     // INIT BREADCRUMBS
-    
+
     $('.xbreadcrumbs').xBreadcrumbs();
 
-    
+
     // TOOLTIP HOVER FOR .bootstrap-tooltip ELEMENTS
-    
+
     $('.bootstrap-tooltip').tooltip();
-    
-    
+
+
     // PNOTIFY DEFAULT OPTIONS
-    
+
     $.pnotify.defaults.delay -= 4500;
     $.pnotify.defaults.history = false;
-    
-    
+
+
     // JSTREE DUMMY THEME (REQUIRED TO AVOID CHANGING THE PLUGIN TO IGNORE THE ORIGINAL CSS SINCE LESS IS USED)
-    $.jstree._themes = "css/plugins/jstree/";
-    
-    
+    // $.jstree._themes = "css/plugins/jstree/";
+
+
     // CUSTOM SCROLLBAR FOR SIDE PANEL
-    
+
     $(".sidebarMenuHolder").mCustomScrollbar({
         scrollButtons:{
             enable:true
@@ -52,16 +52,16 @@ function readyFunction(){
             updateOnContentResize:true
         }
     });
-    
-    
+
+
     // SCROLLBAR SHADOWS
-    
+
     $(".Jstree_shadow_top").prependTo(".sidebarMenuHolder");
     $(".Jstree_shadow_bottom").appendTo(".sidebarMenuHolder");
-    
-    
+
+
     // PANEL STATE CONTROL
-    
+
     $('.panel-slider-arrow').on('click', function(){
         $('.panel, .main-content').toggleClass('retracted');
 

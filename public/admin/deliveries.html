@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>Deliveries - DIP Admin Portal</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0">
+        <link rel="shortcut icon" href="favicon.ico" />
+        <link rel="apple-touch-icon" href="iosicon.png" />
+<!--    DEVELOPMENT LESS -->
+<!--          <link rel="stylesheet/less" href="css/photon.less" media="all" />
+        <link rel="stylesheet/less" href="css/photon-responsive.less" media="all" /> -->
+<!--    PRODUCTION CSS -->
+        <link rel="stylesheet" href="css/css/photon.css" media="all" />
+        <link rel="stylesheet" href="css/css/photon-pt2.css" media="all" />
+
+        <link rel="stylesheet" href="css/css/photon-responsive.css" media="all" />
+
+        <style>
+        .main-content {
+          background: none !important;
+        }
+        .form-horizontal .container-fluid.no-outter-border .span-filler {
+          background: none !important;
+          border: 0px;
+          border-radius: 0px;
+          box-shadow: none;
+        }
+        .retracted.panel {
+          left: -380px;
+        }
+        .panel-content {
+            position: absolute;
+            padding: 0 20px 0 20px;
+        }
+        .retracted.main-content {
+            left: 20px;
+        }
+        </style>
+
+<!--[if IE]>
+        <link rel="stylesheet" type="text/css" href="css/css_compiled/ie-only-min.css" />
+
+
+<![endif]-->
+
+<!--[if lt IE 9]>
+        <link rel="stylesheet" type="text/css" href="css/css_compiled/ie8-only-min.css" />
+        <script type="text/javascript" src="js/plugins/excanvas.js"></script>
+        <script type="text/javascript" src="js/plugins/html5shiv.js"></script>
+        <script type="text/javascript" src="js/plugins/respond.min.js"></script>
+        <script type="text/javascript" src="js/plugins/fixFontIcons.js"></script>
+<![endif]-->
+
+
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.0/jquery-ui.min.js"></script>
+
+<script type="text/javascript" src="js/bootstrap/bootstrap.min.js"></script>
+<script type="text/javascript" src="js/plugins/modernizr.custom.js"></script>
+<script type="text/javascript" src="js/plugins/jquery.pnotify.min.js"></script>
+<script type="text/javascript" src="js/plugins/less-1.3.1.min.js"></script>
+<script type="text/javascript" src="js/plugins/xbreadcrumbs.js"></script>
+<!-- <script type="text/javascript" src="js/plugins/jquery.maskedinput-1.3.min.js"></script>
+<script type="text/javascript" src="js/plugins/jquery.autotab-1.1b.js"></script>
+<script type="text/javascript" src="js/plugins/charCount.js"></script>
+<script type="text/javascript" src="js/plugins/jquery.textareaCounter.js"></script>
+<script type="text/javascript" src="js/plugins/elrte.min.js"></script>
+<script type="text/javascript" src="js/plugins/elrte.en.js"></script>
+<script type="text/javascript" src="js/plugins/select2.js"></script>
+<script type="text/javascript" src="js/plugins/jquery-picklist.min.js"></script>
+<script type="text/javascript" src="js/plugins/jquery.validate.min.js"></script>
+<script type="text/javascript" src="js/plugins/additional-methods.min.js"></script>
+<script type="text/javascript" src="js/plugins/jquery.form.js"></script>
+<script type="text/javascript" src="js/plugins/jquery.metadata.js"></script>
+<script type="text/javascript" src="js/plugins/jquery.mockjax.js"></script>
+<script type="text/javascript" src="js/plugins/jquery.uniform.min.js"></script>
+<script type="text/javascript" src="js/plugins/jquery.tagsinput.min.js"></script>
+<script type="text/javascript" src="js/plugins/jquery.rating.pack.js"></script>
+<script type="text/javascript" src="js/plugins/farbtastic.js"></script>
+<script type="text/javascript" src="js/plugins/jquery.timeentry.min.js"></script>
+<script type="text/javascript" src="js/plugins/jquery.dataTables.min.js"></script>
+<script type="text/javascript" src="js/plugins/jquery.jstree.js"></script>
+<script type="text/javascript" src="js/plugins/dataTables.bootstrap.js"></script>
+<script type="text/javascript" src="js/plugins/jquery.mousewheel.min.js"></script> -->
+<script type="text/javascript" src="js/plugins/jquery.mCustomScrollbar.js"></script>
+<!-- <script type="text/javascript" src="js/plugins/jquery.flot.js"></script>
+<script type="text/javascript" src="js/plugins/jquery.flot.stack.js"></script>
+<script type="text/javascript" src="js/plugins/jquery.flot.pie.js"></script>
+<script type="text/javascript" src="js/plugins/jquery.flot.resize.js"></script>
+<script type="text/javascript" src="js/plugins/raphael.2.1.0.min.js"></script> -->
+<!-- <script type="text/javascript" src="js/plugins/justgage.1.0.1.min.js"></script>
+<script type="text/javascript" src="js/plugins/jquery.qrcode.min.js"></script>
+<script type="text/javascript" src="js/plugins/jquery.clock.js"></script>
+<script type="text/javascript" src="js/plugins/jquery.countdown.js"></script>
+<script type="text/javascript" src="js/plugins/jquery.jqtweet.js"></script> -->
+<script type="text/javascript" src="js/plugins/jquery.cookie.js"></script>
+<!-- <script type="text/javascript" src="js/plugins/bootstrap-fileupload.min.js"></script>
+<script type="text/javascript" src="js/plugins/prettify/prettify.js"></script>
+<script type="text/javascript" src="js/plugins/bootstrapSwitch.js"></script>
+<script type="text/javascript" src="js/plugins/mfupload.js"></script> -->
+
+<script type="text/javascript" src="js/common.js"></script>
+
+    </head>
+
+    <body class="body-dashboard">
+
+    <div class="btn-toolbar btn-mobile-menus">
+        <button class="btn btn-main-menu"></button>
+        <button class="btn btn-user-menu"><i class="icon-logo"></i></button>
+    </div>
+
+
+  <div class="panel">
+
+    <div class="panel-content filler">
+        <div class="panel-logo-dip"></div>
+        <div class="panel-header">
+            <h1><small>Deliveries</small></h1>
+        </div>
+        <div class="panel-search container-fluid">
+            <form class="form-horizontal" action="javascript:;">
+                <input id="panelSearch" placeholder="Search" type="text" name="panelSearch">
+                <button class="btn btn-search"></button>
+                <script>
+                    $().ready(function(){
+                        var searchTags = [
+                            "Dashboard",
+                            "Form Elements",
+                            "Graphs and Statistics",
+                            "Typography",
+                            "Grid",
+                            "Tables",
+                            "Maps",
+                            "Sidebar Widgets",
+                            "Error Pages",
+                            "Help",
+                            "Input Fields",
+                            "Masked Input Fields",
+                            "Autotabs",
+                            "Text Areas",
+                            "Select Menus",
+                            "Other Form Elements",
+                            "Form Validation",
+                            "UI Elements",
+                            "Graphs",
+                            "Statistical Elements",
+                            "400 Bad Request",
+                            "401 Unauthorized",
+                            "403 Forbidden",
+                            "404 Page Not Found",
+                            "500 Internal Server Error",
+                            "503 Service Unavailable"
+                        ];
+                        $( "#panelSearch" ).autocomplete({
+                            source: searchTags
+                        });
+                    });
+                </script>
+            </form>
+        </div>
+
+        <div class="sidebarMenuHolder">
+          <div class="JStree">
+              <div class="Jstree_shadow_top"></div>
+              <div id="jstree"></div>
+              <div class="Jstree_shadow_bottom"></div>
+          </div>
+        </div>
+    </div>
+
+    <div class="panel-slider">
+        <div class="panel-slider-center">
+            <div class="panel-slider-arrow"></div>
+        </div>
+    </div>
+
+    </div>
+        <div class="main-content">
+            <div class="breadcrumb-container">
+              <ul class="xbreadcrumbs">
+                  <li>
+                      <a href="dashboard.html">
+                          <i class="icon-photon home"></i>
+                      </a>
+                  </li>
+                          <li class="current">
+                      <a href="javascript:;">Deliveries</a>
+                  </li>
+              </ul>
+            </div>
+            <header>
+                <!-- <i class="icon-big-notepad"></i>
+                <h2><small>Grid</small></h2>
+                <h3><small>The default Bootstrap grid system that utilizes 12 columns.</small></h3> -->
+            </header>
+            <form class="form-horizontal">
+                <div id="Grid_System" class="container-fluid no-outter-border">
+
+                        <!--Grid System begin-->
+                        <div class="row-fluid">
+                            <div class="span-filler span12">
+                                <div class="widget-holder">
+                                  <div class="widget-flipper">
+                                      <div class="widget-area task-completion widget-front">
+                                          <div class="widget-head">
+                                              Task Completion
+                                              <div>
+                                                  <a href="javascript:;" onclick="flipit(this)"><i class="icon-photon cog"></i></a>
+                                                  <img src="images/photon/w_task@2x.png" alt="arrows">
+                                              </div>
+                                          </div>
+                                          <ul>
+                                              <li>
+                                                  Processed orders
+                                                  <span>56</span>
+                                              </li>
+                                              <li>Pending orders
+                                                  <span>14</span>
+                                              </li>
+                                              <li>Unproc. orders
+                                                  <span>12</span>
+                                              </li>
+                                              <li class="processed-pct">
+                                                  Processed orders:&nbsp;&nbsp;<span>63</span>
+                                                  <div class="progress progress-info">
+                                                      <div class="bar" data-target="63" style="width: 63%"></div>
+                                                  </div>
+                                              </li>
+                                          </ul>
+                                      </div>
+                                      <div class="widget-area task-completion widget-back">
+                                          <div class="widget-savehead">
+                                              <a href="javascript:;" class="btn btn-mini btn-inverse" onclick="flipit(this)"><i class="icon-photon cog"></i>Done</a>
+                                          </div>
+                                          <form lpformnum="3">
+                                              <div class="container-fluid widget-settings">
+                                                  <div class="control-group row-fluid">
+                                                      <div class="span12">
+                                                          <label class="control-label">Filter by Task:</label>
+                                                      </div>
+                                                  </div>
+                                                  <div class="control-group row-fluid">
+                                                      <div class="span12">
+                                                          <div class="controls">
+                                                              <div class="select2-container" id="s2id_autogen6">    <a href="javascript:void(0)" onclick="return false;" class="select2-choice">   <span>Any</span><abbr class="select2-search-choice-close" style="display:none;"></abbr>   <div><b></b></div></a>    <div class="select2-drop select2-offscreen">   <div class="select2-search">       <input type="text" autocomplete="off" class="select2-input">   </div>   <ul class="select2-results">   </ul></div></div><select style="display: none;">
+                                                                  <option selected="" value="Any">Any</option>
+                                                                  <option value="Strategic">Strategic</option>
+                                                                  <option value="Operational">Operational</option>
+                                                                  <option value="Tactical">Tactical</option>
+                                                                  <option value="Other">Other</option>
+                                                              </select>
+                                                          </div>
+                                                      </div>
+                                                  </div>
+                                                  <div class="control-group row-fluid">
+                                                      <div class="span12">
+                                                          <label class="control-label">Filter by Period</label>
+                                                      </div>
+                                                  </div>
+                                                  <div class="control-group row-fluid">
+                                                      <div class="span12">
+                                                          <div class="controls">
+                                                              <div class="select2-container" id="s2id_autogen7">    <a href="javascript:void(0)" onclick="return false;" class="select2-choice">   <span>Last Year</span><abbr class="select2-search-choice-close" style="display:none;"></abbr>   <div><b></b></div></a>    <div class="select2-drop select2-offscreen">   <div class="select2-search">       <input type="text" autocomplete="off" class="select2-input">   </div>   <ul class="select2-results">   </ul></div></div><select style="display: none;">
+                                                                  <option selected="" value="Last Year">Last Year</option>
+                                                                  <option value="Last Quarter">Last Quarter</option>
+                                                                  <option value="Last Month">Last Month</option>
+                                                                  <option value="Last Week">Last Week</option>
+                                                                  <option value="Yesterday">Yesterday</option>
+                                                              </select>
+                                                          </div>
+                                                      </div>
+                                                  </div>
+                                                  <div class="control-group row-fluid">
+                                                      <div class="span12">
+                                                          <label class="control-label">Show Hidden</label>
+                                                      </div>
+                                                  </div>
+                                                  <div class="control-group row-fluid">
+                                                      <div class="span12">
+                                                          <div class="controls">
+                                                              <div class="select2-container" id="s2id_autogen8">    <a href="javascript:void(0)" onclick="return false;" class="select2-choice">   <span>Yes</span><abbr class="select2-search-choice-close" style="display:none;"></abbr>   <div><b></b></div></a>    <div class="select2-drop select2-offscreen">   <div class="select2-search">       <input type="text" autocomplete="off" class="select2-input">   </div>   <ul class="select2-results">   </ul></div></div><select style="display: none;">
+                                                                  <option selected="" value="Yes">Yes</option>
+                                                                  <option value="No">No</option>
+                                                                  <option value="Only if Viking">Only if Viking</option>
+                                                              </select>
+                                                          </div>
+                                                      </div>
+                                                  </div>
+                                              </div>
+                                          </form>
+                                      </div>
+                                  </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!--Grid System end-->
+
+                </div><!-- end container -->
+
+            </form>
+        </div>
+        </body>
+</html>
