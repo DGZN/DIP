@@ -1,41 +1,97 @@
+var React = require('react');
+var ReactDOM = require('react-dom');
 
-var Table = FixedDataTable.Table;
+var BSTable = ReactBootstrap.Table;
+var Well = ReactBootstrap.Well;
 
-// Table data as a list of array.
-const rows = [
-  ['a1', 'b1', 'c1'],
-  ['a2', 'b2', 'c2'],
-  ['a3', 'b3', 'c3'],
-  // .... and more
-];
+var Input = ReactBootstrap.Input;
 
-// Render your table
-ReactDOM.render(
-  <Table
-    rowHeight={50}
-    rowsCount={rows.length}
-    width={5000}
-    height={5000}
-    headerHeight={50}>
-    <Column
-      header={<Cell>Col 1</Cell>}
-      cell={<Cell>Column 1 static content</Cell>}
-      width={2000}
-    />
-    <Column
-      header={<Cell>Col 2</Cell>}
-      cell={<MyCustomCell mySpecialProp="column2" />}
-      width={1000}
-    />
-    <Column
-      header={<Cell>Col 3</Cell>}
-      cell={({rowIndex, ...props}) => (
-        <Cell {...props}>
-          Data for column 3: {rows[rowIndex][2]}
-        </Cell>
-      )}
-      width={2000}
-    />
-  </Table>,
-  document.getElementById('table')
-);
+var Row = React.createClass({
+  getInitialState: function() {
+    return {
+        viewed: false
+    };
+  },
+  handleClick: function(){
+    this.setState({viewed: true});
+  },
+  render: function() {
+    return (
+        <tr>
+          <td>{this.props.row.title}</td>
+          <td><a  onClick={this.handleClick}>view {this.state.viewed ? '(viewed)' : ''}</a></td>
+        </tr>
+    );
+  }
+})
+
+var Table = React.createClass({
+  render: function() {
+    var props = this.props;
+    var rows = props.rows
+      .filter(function(row){
+        return row.title.toLowerCase().indexOf(props.filterText.toLowerCase()) > -1;
+      })
+      .map(function(row){
+        return <Row key={row.title} row={row} />;
+      });
+
+    return (
+        <div className="row spacer">
+          <div>
+            <BSTable striped={true} bordered={true} hover={true}>
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Link</th>
+                    </tr>
+                </thead>
+                <tbody>{rows}</tbody>
+            </BSTable>
+          </div>
+        </div>
+    );
+  }
+});
+
+var SearchBar = React.createClass({
+  handleChange: function() {
+      this.props.onUserInput(
+          this.refs.filterTextInput.value
+      );
+  },
+  render: function() {
+    return (
+      <div className="row table-search">
+        <form className="form-grop" onSubmit={this.handleSubmit}>
+            <input ref="filterTextInput" type="search" className="form-control input-lg" value={this.props.filterText} onChange={this.handleChange} placeholder="Search for packages" aria-describedby="sizing-addon1"></input>
+        </form>
+      </div>
+    );
+  }
+});
+
+var DataTable = React.createClass({
+  getInitialState: function() {
+    return {
+        filterText: ''
+    };
+  },
+
+  handleUserInput: function(filterText) {
+    this.setState({
+        filterText: filterText
+    });
+  },
+
+  render: function() {
+    return (
+        <Well className="data-table-well">
+          <SearchBar onUserInput={this.handleUserInput} filterText={this.state.filterText} />
+          <Table filterText={this.state.filterText} rows={this.props.rows} />
+        </Well>
+    );
+  }
+});
+
+module.exports = DataTable;

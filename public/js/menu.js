@@ -1,4 +1,7 @@
 
+var React = require('react');
+var ReactDOM = require('react-dom');
+
 var Button = ReactBootstrap.Button;
 var Glyphicon = ReactBootstrap.Glyphicon;
 
@@ -16,6 +19,11 @@ var SlideMenu = React.createClass({
     menu.style['-o-transition'] = "right .5s ease-in-out";
     menu.style['transition'] = "right .5s ease-in-out";
     menu.style['right'] = open ? '0px' : '-24.2%';
+  }
+, clicked: function() {
+  console.log("I was clicked")
+  console.log($('.table-body').eq(0))
+  console.log(this.refs.table.props.children[1].props.children)
   }
 , getInitialState: function() {
     return {
@@ -44,10 +52,7 @@ var SlideMenu = React.createClass({
           </Well>
         </div>
         <div id="left" classN="col-md-12">
-          <div className="row">
-            <div className="col-md-12">
-            </div>
-          </div>
+        
         </div>
       </div>
     );

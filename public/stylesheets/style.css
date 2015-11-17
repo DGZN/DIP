@@ -5,15 +5,28 @@ body {
   background-image: url('../images/panel_bck.jpg');
 }
 
+.navbar-nav>li>.dropdown-menu {
+  z-index: 999999;
+}
+
 #content-block {
   width: 100%;
   height: 100%;
 }
+
+.data-table-well {
+  padding: 25px;
+}
+
+.table-search {
+  padding: 25px;
+}
+
 #left {
   position: absolute;
   width: 98%;
   display: block;
-  height: 90%;
+  height: 93%;
   padding: 20px 15px 0 5px;
   border: 5px;
   border-radius: 5px;
@@ -29,10 +42,11 @@ body {
     right: -24.2%;
     width: 25%;
     min-width: 320px;
-    height: 90%;
+    height: 93%;
     background-color: #222;
     padding: 50px 12px 0 12px;
     cursor: pointer;
+    border-radius: 5px;
     z-index: 99999;
 }
 
