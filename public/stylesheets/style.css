@@ -18,6 +18,10 @@ body {
   padding: 25px;
 }
 
+.data-table-thead {
+  cursor: pointer;
+}
+
 .table-search {
   padding: 25px;
 }

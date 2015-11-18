@@ -8,14 +8,22 @@ var DataTable = require('./table.js');
 
 var rows = [{
     title : "Angular with Yeoman",
+    description: "A"
   },{
     title : "Using D3 with Rickshaw and Angular",
+    description: "B"
   },{
     title : "Canvas with paper.js",
+    description: "C"
   },{
     title : "Express.js middleware",
+    description: "Z"
   },{
     title : "MEAN stack - episode 1",
+    description: "K"
+  },{
+    title : "Bear Claws on sale!",
+    description: "M"
   }
 ];
 
@@ -33,7 +41,7 @@ var App = React.createClass({
         <div className="container-fluid">
           <SlideMenu />
           <div id="left" className="col-md-12">
-            <DataTable rows={rows} />
+            <DataTable ref="datatable" rows={rows} />
           </div>
         </div>
       </div>

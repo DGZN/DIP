@@ -54,14 +54,22 @@
 
 	var rows = [{
 	    title : "Angular with Yeoman",
+	    description: "A"
 	  },{
 	    title : "Using D3 with Rickshaw and Angular",
+	    description: "B"
 	  },{
 	    title : "Canvas with paper.js",
+	    description: "C"
 	  },{
 	    title : "Express.js middleware",
+	    description: "Z"
 	  },{
 	    title : "MEAN stack - episode 1",
+	    description: "K"
+	  },{
+	    title : "Bear Claws on sale!",
+	    description: "M"
 	  }
 	];
 
@@ -79,7 +87,7 @@
 	        React.createElement("div", {className: "container-fluid"}, 
 	          React.createElement(SlideMenu, null), 
 	          React.createElement("div", {id: "left", className: "col-md-12"}, 
-	            React.createElement(DataTable, {rows: rows})
+	            React.createElement(DataTable, {ref: "datatable", rows: rows})
 	          )
 	        )
 	      )
@@ -223,19 +231,37 @@
 	var Row = React.createClass({displayName: "Row",
 	  getInitialState: function() {
 	    return {
-	        viewed: false
+	      viewed: false
+	    , rowChecks: {}
 	    };
 	  },
 	  handleClick: function(){
 	    this.setState({viewed: true});
 	  },
+	  handleCheck: function(props) {
+	    var checks = this.state.rowChecks
+	    checks[props.rowID] = {
+	      checked: !props.checked
+	    }
+	    this.setState({ rowChecks: checks })
+	  },
 	  render: function() {
+	    // var rowChecked = this.state.checked.indexOf(this.props.rowID) > -1 ? true : false;
+	    // console.log("rowChecked", rowChecked, 'checked', this.props.checked);
+	    var isChecked = this.props.checked
+	    if ( typeof this.state.rowChecks[this.props.rowID] !== "undefined" ) {
+	      isChecked = this.state.rowChecks[this.props.rowID].checked
+	    }
+	    var checked = isChecked
+	      ? React.createElement(Input, {type: "checkbox", onChange: this.handleCheck.bind(this, this.props), checked: true, label: "1"})
+	      : React.createElement(Input, {type: "checkbox", onChange: this.handleCheck.bind(this, this.props), label: "1"})
 	    return (
 	        React.createElement("tr", null, 
 	          React.createElement("td", {className: "rowID"}, 
-	            React.createElement(Input, {type: "checkbox", label: this.props.rowID})
+	            checked
 	          ), 
 	          React.createElement("td", null, this.props.row.title), 
+	          React.createElement("td", null, this.props.row.description), 
 	          React.createElement("td", null, React.createElement("a", {onClick: this.handleClick}, "view ", this.state.viewed ? '(viewed)' : ''))
 	        )
 	    );
@@ -243,33 +269,53 @@
 	})
 
 	var Table = React.createClass({displayName: "Table",
-	  render: function() {
+	  getInitialState: function() {
+	    return {
+	      sortField: ''
+	    , checked: false
+	    };
+	  }
+	, render: function() {
 	    var props = this.props;
+	    var state = this.state
 	    var rows = props.rows
 	      .filter(function(row){
 	        return row.title.toLowerCase().indexOf(props.filterText.toLowerCase()) > -1;
 	      })
+	      .sort(function(a, b){
+	        if (!state.sortField) return;
+	        var field = state.sortField;
+	        if(a[field] < b[field]) return -1;
+	        if(a[field] > b[field]) return 1;
+	        return 0;
+	      })
 	      .map(function(row, i){
 	        i++;
-	        return React.createElement(Row, {key: row.title, rowID: i, row: row});
+	        return React.createElement(Row, {key: row.title, rowID: i, row: row, checked: state.checked});
 	      });
-
 	    return (
 	        React.createElement("div", {className: "row spacer"}, 
 	          React.createElement("div", null, 
 	            React.createElement(BSTable, {striped: true, bordered: true, hover: true}, 
-	                React.createElement("thead", null, 
-	                    React.createElement("tr", null, 
-	                      React.createElement("th", null, "#"), 
-	                      React.createElement("th", null, "Title"), 
-	                      React.createElement("th", null, "Link")
-	                    )
+	                React.createElement("thead", {className: "data-table-thead"}, 
+	                  React.createElement("tr", null, 
+	                    React.createElement("th", null, React.createElement(Input, {type: "checkbox", onChange: this.handleCheck, label: "1"})), 
+	                    React.createElement("th", {onClick: this.handleClick.bind(this, 'test')}, "Title"), 
+	                    React.createElement("th", {onClick: this.handleClick.bind(this, 'description')}, "Description"), 
+	                    React.createElement("th", null, "Link")
+	                  )
 	                ), 
 	                React.createElement("tbody", null, rows)
 	            )
 	          )
 	        )
 	    );
+	  }
+	, handleClick: function(sortField) {
+	    this.setState({ sortField: sortField })
+	  }
+	, handleCheck: function() {
+	    this.setState({ checked: !this.state.checked })
 	  }
 	});
 
@@ -293,14 +339,13 @@
 	var DataTable = React.createClass({displayName: "DataTable",
 	  getInitialState: function() {
 	    return {
-	        filterText: ''
+	      filterText: ''
+	    , sortField: ''
 	    };
 	  },
 
 	  handleUserInput: function(filterText) {
-	    this.setState({
-	        filterText: filterText
-	    });
+	    this.setState({ filterText: filterText });
 	  },
 
 	  render: function() {
