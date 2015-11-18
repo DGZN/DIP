@@ -22,6 +22,21 @@ body {
   padding: 25px;
 }
 
+.rowID {
+  width: 1.5%;
+  text-align: left;
+}
+
+.rowID .form-group {
+  margin-bottom: 0px !important;
+}
+
+.rowID .form-group .checkbox {
+  margin-top: 0px !important;
+  margin-bottom: 0px !important;
+}
+
+
 #left {
   position: absolute;
   width: 98%;

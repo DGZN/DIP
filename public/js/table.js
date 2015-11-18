@@ -5,6 +5,7 @@ var BSTable = ReactBootstrap.Table;
 var Well = ReactBootstrap.Well;
 
 var Input = ReactBootstrap.Input;
+var Check = ReactBootstrap.Check;
 
 var Row = React.createClass({
   getInitialState: function() {
@@ -18,6 +19,9 @@ var Row = React.createClass({
   render: function() {
     return (
         <tr>
+          <td className="rowID">
+            <Input type="checkbox" label={this.props.rowID}  />
+          </td>
           <td>{this.props.row.title}</td>
           <td><a  onClick={this.handleClick}>view {this.state.viewed ? '(viewed)' : ''}</a></td>
         </tr>
@@ -32,8 +36,9 @@ var Table = React.createClass({
       .filter(function(row){
         return row.title.toLowerCase().indexOf(props.filterText.toLowerCase()) > -1;
       })
-      .map(function(row){
-        return <Row key={row.title} row={row} />;
+      .map(function(row, i){
+        i++;
+        return <Row key={row.title} rowID={i} row={row} />;
       });
 
     return (
@@ -42,8 +47,9 @@ var Table = React.createClass({
             <BSTable striped={true} bordered={true} hover={true}>
                 <thead>
                     <tr>
-                        <th>Title</th>
-                        <th>Link</th>
+                      <th>#</th>
+                      <th>Title</th>
+                      <th>Link</th>
                     </tr>
                 </thead>
                 <tbody>{rows}</tbody>

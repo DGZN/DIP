@@ -75,7 +75,7 @@
 	  }
 	, render: function() {
 	    return (
-	      React.createElement("div", {id: "left", classN: "col-md-12"}, 
+	      React.createElement("div", {id: "left", className: "col-md-12"}, 
 	        React.createElement(DataTable, {rows: rows})
 	      )
 	    );
@@ -111,6 +111,7 @@
 	var Well = ReactBootstrap.Well;
 
 	var Input = ReactBootstrap.Input;
+	var Check = ReactBootstrap.Check;
 
 	var Row = React.createClass({displayName: "Row",
 	  getInitialState: function() {
@@ -124,6 +125,9 @@
 	  render: function() {
 	    return (
 	        React.createElement("tr", null, 
+	          React.createElement("td", {className: "rowID"}, 
+	            React.createElement(Input, {type: "checkbox", label: this.props.rowID})
+	          ), 
 	          React.createElement("td", null, this.props.row.title), 
 	          React.createElement("td", null, React.createElement("a", {onClick: this.handleClick}, "view ", this.state.viewed ? '(viewed)' : ''))
 	        )
@@ -138,8 +142,9 @@
 	      .filter(function(row){
 	        return row.title.toLowerCase().indexOf(props.filterText.toLowerCase()) > -1;
 	      })
-	      .map(function(row){
-	        return React.createElement(Row, {key: row.title, row: row});
+	      .map(function(row, i){
+	        i++;
+	        return React.createElement(Row, {key: row.title, rowID: i, row: row});
 	      });
 
 	    return (
@@ -148,8 +153,9 @@
 	            React.createElement(BSTable, {striped: true, bordered: true, hover: true}, 
 	                React.createElement("thead", null, 
 	                    React.createElement("tr", null, 
-	                        React.createElement("th", null, "Title"), 
-	                        React.createElement("th", null, "Link")
+	                      React.createElement("th", null, "#"), 
+	                      React.createElement("th", null, "Title"), 
+	                      React.createElement("th", null, "Link")
 	                    )
 	                ), 
 	                React.createElement("tbody", null, rows)

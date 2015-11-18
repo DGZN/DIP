@@ -29,7 +29,7 @@ var App = React.createClass({
   }
 , render: function() {
     return (
-      <div id="left" classN="col-md-12">
+      <div id="left" className="col-md-12">
         <DataTable rows={rows} />
       </div>
     );
