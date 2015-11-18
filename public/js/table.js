@@ -72,9 +72,12 @@ var Table = React.createClass({
       })
     var rows = props.rows
       .filter(function(row){
-        row.hidden = row.title.toLowerCase().indexOf(props.filterText.toLowerCase()) == -1
-          ? true
-          : false;
+        row.hidden = true;
+        props.columns.forEach(function(field, i){
+          if (row[field].toLowerCase().indexOf(props.filterText.toLowerCase()) > -1) {
+            row.hidden = false
+          }
+        })
         return true;
       })
       .sort(function(a, b){

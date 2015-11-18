@@ -55,26 +55,32 @@
 	var rows = [{
 	    title : "A",
 	    description: "F",
+	    date: "Cat",
 	    link: "123"
 	  },{
 	    title : "B",
 	    description: "E",
+	    date: "TRain",
 	    link: "123"
 	  },{
 	    title : "C",
 	    description: "D",
+	    date: "Zed",
 	    link: "123"
 	  },{
 	    title : "E",
 	    description: "C",
+	    date: "Frog",
 	    link: "123"
 	  },{
 	    title : "F",
 	    description: "B",
+	    date: "Lobster",
 	    link: "123"
 	  },{
 	    title : "D",
 	    description: "A",
+	    date: "Orange",
 	    link: "456"
 	  }
 	];
@@ -299,9 +305,12 @@
 	      })
 	    var rows = props.rows
 	      .filter(function(row){
-	        row.hidden = row.title.toLowerCase().indexOf(props.filterText.toLowerCase()) == -1
-	          ? true
-	          : false;
+	        row.hidden = true;
+	        props.columns.forEach(function(field, i){
+	          if (row[field].toLowerCase().indexOf(props.filterText.toLowerCase()) > -1) {
+	            row.hidden = false
+	          }
+	        })
 	        return true;
 	      })
 	      .sort(function(a, b){

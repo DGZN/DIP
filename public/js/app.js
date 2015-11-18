@@ -9,26 +9,32 @@ var DataTable = require('./table.js');
 var rows = [{
     title : "A",
     description: "F",
+    date: "Cat",
     link: "123"
   },{
     title : "B",
     description: "E",
+    date: "TRain",
     link: "123"
   },{
     title : "C",
     description: "D",
+    date: "Zed",
     link: "123"
   },{
     title : "E",
     description: "C",
+    date: "Frog",
     link: "123"
   },{
     title : "F",
     description: "B",
+    date: "Lobster",
     link: "123"
   },{
     title : "D",
     description: "A",
+    date: "Orange",
     link: "456"
   }
 ];
