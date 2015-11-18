@@ -26,21 +26,25 @@ var Row = React.createClass({
       this.setState(nextProps)
   },
   render: function() {
+    var self = this;
     if (this.props.override)
       var isChecked = this.props.checked
     if (this.state.override)
       var isChecked = this.state.checked
     var checked = isChecked
-      ? <Input type="checkbox" onChange={this.handleCheck} checked label="1" />
-      : <Input type="checkbox" onChange={this.handleCheck} label="1" />
+      ? <Input type="checkbox" onChange={this.handleCheck} checked label=" " />
+      : <Input type="checkbox" onChange={this.handleCheck} label=" " />
+    var cells = self.props.columns.map(function(cell, i){
+      return (
+        <td key={i}>{self.props.row[cell]}</td>
+      )
+    })
     return (
         <tr className={this.props.hidden ? 'hidden' : ''}>
           <td className="rowID">
             {checked}
           </td>
-          <td>{this.props.row.title}</td>
-          <td>{this.props.row.description}</td>
-          <td><a onClick={this.handleClick}>view {this.state.viewed ? '(viewed)' : ''}</a></td>
+          {cells}
         </tr>
     );
   }
@@ -57,13 +61,21 @@ var Table = React.createClass({
   render: function() {
     var props = this.props;
     var state = this.state
+    var self = this
+    var columns = props.columns
+      .map(function(column, i){
+        return (
+          <th key={i} onClick={self.handleClick.bind(self, column)}>
+            {column.toUpperCase()}
+          </th>
+        )
+      })
     var rows = props.rows
       .filter(function(row){
         row.hidden = row.title.toLowerCase().indexOf(props.filterText.toLowerCase()) == -1
           ? true
           : false;
         return true;
-        //return row.title.toLowerCase().indexOf(props.filterText.toLowerCase()) > -1;
       })
       .sort(function(a, b){
         if (!state.sortField) return;
@@ -81,6 +93,7 @@ var Table = React.createClass({
             checked={state.checked}
             sortField={state.sortField}
             hidden={row.hidden ? true : false}
+            columns={props.columns}
             override={state.override}  />
         )
       });
@@ -90,13 +103,13 @@ var Table = React.createClass({
             <BSTable striped={true} bordered={true} hover={true}>
                 <thead className="data-table-thead">
                   <tr>
-                    <th><Input type="checkbox" onChange={this.handleCheck} label="1" /></th>
-                    <th onClick={this.handleClick.bind(this, 'title')}>Title</th>
-                    <th onClick={this.handleClick.bind(this, 'description')}>Description</th>
-                    <th>Link</th>
+                    <th><Input type="checkbox" standalone onChange={this.handleCheck} label=" " /></th>
+                    {columns}
                   </tr>
                 </thead>
-                <tbody>{rows}</tbody>
+                <tbody>
+                  {rows}
+                </tbody>
             </BSTable>
           </div>
         </div>
@@ -141,10 +154,15 @@ var DataTable = React.createClass({
 
   render: function() {
     return (
-        <Well className="data-table-well">
-          <SearchBar onUserInput={this.handleUserInput} filterText={this.state.filterText} />
-          <Table filterText={this.state.filterText} rows={this.props.rows} override={false} />
-        </Well>
+      <Well className="data-table-well">
+        <SearchBar onUserInput={this.handleUserInput} filterText={this.state.filterText} />
+        <Table
+          ref="dataTable"
+          filterText={this.state.filterText}
+          rows={this.props.rows}
+          columns={this.props.columns}
+          override={false} />
+      </Well>
     );
   }
 });

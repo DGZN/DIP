@@ -54,22 +54,28 @@
 
 	var rows = [{
 	    title : "A",
-	    description: "F"
+	    description: "F",
+	    link: "123"
 	  },{
 	    title : "B",
-	    description: "E"
+	    description: "E",
+	    link: "123"
 	  },{
 	    title : "C",
-	    description: "D"
+	    description: "D",
+	    link: "123"
 	  },{
 	    title : "E",
-	    description: "C"
+	    description: "C",
+	    link: "123"
 	  },{
 	    title : "F",
-	    description: "B"
+	    description: "B",
+	    link: "123"
 	  },{
 	    title : "D",
-	    description: "A"
+	    description: "A",
+	    link: "456"
 	  }
 	];
 
@@ -87,7 +93,7 @@
 	        React.createElement("div", {className: "container-fluid"}, 
 	          React.createElement(SlideMenu, null), 
 	          React.createElement("div", {id: "left", className: "col-md-12"}, 
-	            React.createElement(DataTable, {ref: "datatable", rows: rows})
+	            React.createElement(DataTable, {ref: "datatable", rows: rows, columns: Object.keys(rows[0])})
 	          )
 	        )
 	      )
@@ -247,21 +253,25 @@
 	      this.setState(nextProps)
 	  },
 	  render: function() {
+	    var self = this;
 	    if (this.props.override)
 	      var isChecked = this.props.checked
 	    if (this.state.override)
 	      var isChecked = this.state.checked
 	    var checked = isChecked
-	      ? React.createElement(Input, {type: "checkbox", onChange: this.handleCheck, checked: true, label: "1"})
-	      : React.createElement(Input, {type: "checkbox", onChange: this.handleCheck, label: "1"})
+	      ? React.createElement(Input, {type: "checkbox", onChange: this.handleCheck, checked: true, label: " "})
+	      : React.createElement(Input, {type: "checkbox", onChange: this.handleCheck, label: " "})
+	    var cells = self.props.columns.map(function(cell, i){
+	      return (
+	        React.createElement("td", {key: i}, self.props.row[cell])
+	      )
+	    })
 	    return (
 	        React.createElement("tr", {className: this.props.hidden ? 'hidden' : ''}, 
 	          React.createElement("td", {className: "rowID"}, 
 	            checked
 	          ), 
-	          React.createElement("td", null, this.props.row.title), 
-	          React.createElement("td", null, this.props.row.description), 
-	          React.createElement("td", null, React.createElement("a", {onClick: this.handleClick}, "view ", this.state.viewed ? '(viewed)' : ''))
+	          cells
 	        )
 	    );
 	  }
@@ -278,13 +288,21 @@
 	  render: function() {
 	    var props = this.props;
 	    var state = this.state
+	    var self = this
+	    var columns = props.columns
+	      .map(function(column, i){
+	        return (
+	          React.createElement("th", {key: i, onClick: self.handleClick.bind(self, column)}, 
+	            column.toUpperCase()
+	          )
+	        )
+	      })
 	    var rows = props.rows
 	      .filter(function(row){
 	        row.hidden = row.title.toLowerCase().indexOf(props.filterText.toLowerCase()) == -1
 	          ? true
 	          : false;
 	        return true;
-	        //return row.title.toLowerCase().indexOf(props.filterText.toLowerCase()) > -1;
 	      })
 	      .sort(function(a, b){
 	        if (!state.sortField) return;
@@ -302,6 +320,7 @@
 	            checked: state.checked, 
 	            sortField: state.sortField, 
 	            hidden: row.hidden ? true : false, 
+	            columns: props.columns, 
 	            override: state.override})
 	        )
 	      });
@@ -311,13 +330,13 @@
 	            React.createElement(BSTable, {striped: true, bordered: true, hover: true}, 
 	                React.createElement("thead", {className: "data-table-thead"}, 
 	                  React.createElement("tr", null, 
-	                    React.createElement("th", null, React.createElement(Input, {type: "checkbox", onChange: this.handleCheck, label: "1"})), 
-	                    React.createElement("th", {onClick: this.handleClick.bind(this, 'title')}, "Title"), 
-	                    React.createElement("th", {onClick: this.handleClick.bind(this, 'description')}, "Description"), 
-	                    React.createElement("th", null, "Link")
+	                    React.createElement("th", null, React.createElement(Input, {type: "checkbox", standalone: true, onChange: this.handleCheck, label: " "})), 
+	                    columns
 	                  )
 	                ), 
-	                React.createElement("tbody", null, rows)
+	                React.createElement("tbody", null, 
+	                  rows
+	                )
 	            )
 	          )
 	        )
@@ -362,10 +381,15 @@
 
 	  render: function() {
 	    return (
-	        React.createElement(Well, {className: "data-table-well"}, 
-	          React.createElement(SearchBar, {onUserInput: this.handleUserInput, filterText: this.state.filterText}), 
-	          React.createElement(Table, {filterText: this.state.filterText, rows: this.props.rows, override: false})
-	        )
+	      React.createElement(Well, {className: "data-table-well"}, 
+	        React.createElement(SearchBar, {onUserInput: this.handleUserInput, filterText: this.state.filterText}), 
+	        React.createElement(Table, {
+	          ref: "dataTable", 
+	          filterText: this.state.filterText, 
+	          rows: this.props.rows, 
+	          columns: this.props.columns, 
+	          override: false})
+	      )
 	    );
 	  }
 	});

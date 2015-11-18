@@ -9,6 +9,11 @@ body {
   display: none;
 }
 
+.checkbox {
+  margin: 5px 0px 0px 5px !important;
+  cursor: pointer !important;
+}
+
 .navbar-nav>li>.dropdown-menu {
   z-index: 999999;
 }
