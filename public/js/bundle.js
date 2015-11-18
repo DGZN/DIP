@@ -53,23 +53,23 @@
 
 
 	var rows = [{
-	    title : "Angular with Yeoman",
-	    description: "A"
+	    title : "A",
+	    description: "F"
 	  },{
-	    title : "Using D3 with Rickshaw and Angular",
-	    description: "B"
+	    title : "B",
+	    description: "E"
 	  },{
-	    title : "Canvas with paper.js",
+	    title : "C",
+	    description: "D"
+	  },{
+	    title : "E",
 	    description: "C"
 	  },{
-	    title : "Express.js middleware",
-	    description: "Z"
+	    title : "F",
+	    description: "B"
 	  },{
-	    title : "MEAN stack - episode 1",
-	    description: "K"
-	  },{
-	    title : "Bear Claws on sale!",
-	    description: "M"
+	    title : "D",
+	    description: "A"
 	  }
 	];
 
@@ -272,7 +272,7 @@
 	    return {
 	      sortField: ''
 	    , checked: false
-	    , override: false
+	    , override: this.props.override || false
 	    };
 	  }
 	, render: function() {
@@ -300,7 +300,7 @@
 	                React.createElement("thead", {className: "data-table-thead"}, 
 	                  React.createElement("tr", null, 
 	                    React.createElement("th", null, React.createElement(Input, {type: "checkbox", onChange: this.handleCheck, label: "1"})), 
-	                    React.createElement("th", {onClick: this.handleClick.bind(this, 'test')}, "Title"), 
+	                    React.createElement("th", {onClick: this.handleClick.bind(this, 'title')}, "Title"), 
 	                    React.createElement("th", {onClick: this.handleClick.bind(this, 'description')}, "Description"), 
 	                    React.createElement("th", null, "Link")
 	                  )
@@ -352,7 +352,7 @@
 	    return (
 	        React.createElement(Well, {className: "data-table-well"}, 
 	          React.createElement(SearchBar, {onUserInput: this.handleUserInput, filterText: this.state.filterText}), 
-	          React.createElement(Table, {filterText: this.state.filterText, rows: this.props.rows})
+	          React.createElement(Table, {filterText: this.state.filterText, rows: this.props.rows, override: false})
 	        )
 	    );
 	  }

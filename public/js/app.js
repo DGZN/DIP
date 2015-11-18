@@ -7,23 +7,23 @@ var DataTable = require('./table.js');
 
 
 var rows = [{
-    title : "Angular with Yeoman",
-    description: "A"
+    title : "A",
+    description: "F"
   },{
-    title : "Using D3 with Rickshaw and Angular",
-    description: "B"
+    title : "B",
+    description: "E"
   },{
-    title : "Canvas with paper.js",
+    title : "C",
+    description: "D"
+  },{
+    title : "E",
     description: "C"
   },{
-    title : "Express.js middleware",
-    description: "Z"
+    title : "F",
+    description: "B"
   },{
-    title : "MEAN stack - episode 1",
-    description: "K"
-  },{
-    title : "Bear Claws on sale!",
-    description: "M"
+    title : "D",
+    description: "A"
   }
 ];
 

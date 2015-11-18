@@ -51,7 +51,7 @@ var Table = React.createClass({
     return {
       sortField: ''
     , checked: false
-    , override: false
+    , override: this.props.override || false
     };
   }
 , render: function() {
@@ -79,7 +79,7 @@ var Table = React.createClass({
                 <thead className="data-table-thead">
                   <tr>
                     <th><Input type="checkbox" onChange={this.handleCheck} label="1" /></th>
-                    <th onClick={this.handleClick.bind(this, 'test')}>Title</th>
+                    <th onClick={this.handleClick.bind(this, 'title')}>Title</th>
                     <th onClick={this.handleClick.bind(this, 'description')}>Description</th>
                     <th>Link</th>
                   </tr>
@@ -131,7 +131,7 @@ var DataTable = React.createClass({
     return (
         <Well className="data-table-well">
           <SearchBar onUserInput={this.handleUserInput} filterText={this.state.filterText} />
-          <Table filterText={this.state.filterText} rows={this.props.rows} />
+          <Table filterText={this.state.filterText} rows={this.props.rows} override={false} />
         </Well>
     );
   }
