@@ -255,7 +255,7 @@
 	      ? React.createElement(Input, {type: "checkbox", onChange: this.handleCheck, checked: true, label: "1"})
 	      : React.createElement(Input, {type: "checkbox", onChange: this.handleCheck, label: "1"})
 	    return (
-	        React.createElement("tr", null, 
+	        React.createElement("tr", {className: this.props.hidden ? 'hidden' : ''}, 
 	          React.createElement("td", {className: "rowID"}, 
 	            checked
 	          ), 
@@ -274,13 +274,17 @@
 	    , checked: false
 	    , override: this.props.override || false
 	    };
-	  }
-	, render: function() {
+	  },
+	  render: function() {
 	    var props = this.props;
 	    var state = this.state
 	    var rows = props.rows
 	      .filter(function(row){
-	        return row.title.toLowerCase().indexOf(props.filterText.toLowerCase()) > -1;
+	        row.hidden = row.title.toLowerCase().indexOf(props.filterText.toLowerCase()) == -1
+	          ? true
+	          : false;
+	        return true;
+	        //return row.title.toLowerCase().indexOf(props.filterText.toLowerCase()) > -1;
 	      })
 	      .sort(function(a, b){
 	        if (!state.sortField) return;
@@ -291,7 +295,15 @@
 	      })
 	      .map(function(row, i){
 	        i++;
-	        return React.createElement(Row, {key: row.title, rowID: i, row: row, checked: state.checked, sortField: state.sortField, override: state.override});
+	        return (
+	          React.createElement(Row, {
+	            key: row.title, 
+	            rowID: i, row: row, 
+	            checked: state.checked, 
+	            sortField: state.sortField, 
+	            hidden: row.hidden ? true : false, 
+	            override: state.override})
+	        )
 	      });
 	    return (
 	        React.createElement("div", {className: "row spacer"}, 
@@ -310,11 +322,11 @@
 	          )
 	        )
 	    );
-	  }
-	, handleClick: function(sortField) {
+	  },
+	  handleClick: function(sortField) {
 	    this.setState({ sortField: sortField, override: false })
-	  }
-	, handleCheck: function() {
+	  },
+	  handleCheck: function() {
 	    this.setState({ checked: !this.state.checked, override: true })
 	  }
 	});

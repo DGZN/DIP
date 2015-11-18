@@ -5,6 +5,10 @@ body {
   background-image: url('../images/panel_bck.jpg');
 }
 
+.hidden {
+  display: none;
+}
+
 .navbar-nav>li>.dropdown-menu {
   z-index: 999999;
 }
