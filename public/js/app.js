@@ -1,9 +1,8 @@
 var React = require('react');
 var ReactDOM = require('react-dom');
 
-// require ('./menu.js');
-// require ('./bootstrap-components.js');
-
+var NavBar = require('./navBar.js');
+var SlideMenu = require('./menu.js');
 var DataTable = require('./table.js');
 
 
@@ -29,8 +28,14 @@ var App = React.createClass({
   }
 , render: function() {
     return (
-      <div id="left" className="col-md-12">
-        <DataTable rows={rows} />
+      <div>
+        <NavBar />
+        <div className="container-fluid">
+          <SlideMenu />
+          <div id="left" className="col-md-12">
+            <DataTable rows={rows} />
+          </div>
+        </div>
       </div>
     );
   }

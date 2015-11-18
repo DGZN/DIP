@@ -47,10 +47,9 @@
 	var React = __webpack_require__(1);
 	var ReactDOM = __webpack_require__(2);
 
-	// require ('./menu.js');
-	// require ('./bootstrap-components.js');
-
-	var DataTable = __webpack_require__(3);
+	var NavBar = __webpack_require__(3);
+	var SlideMenu = __webpack_require__(4);
+	var DataTable = __webpack_require__(5);
 
 
 	var rows = [{
@@ -75,8 +74,14 @@
 	  }
 	, render: function() {
 	    return (
-	      React.createElement("div", {id: "left", className: "col-md-12"}, 
-	        React.createElement(DataTable, {rows: rows})
+	      React.createElement("div", null, 
+	        React.createElement(NavBar, null), 
+	        React.createElement("div", {className: "container-fluid"}, 
+	          React.createElement(SlideMenu, null), 
+	          React.createElement("div", {id: "left", className: "col-md-12"}, 
+	            React.createElement(DataTable, {rows: rows})
+	          )
+	        )
 	      )
 	    );
 	  }
@@ -102,6 +107,108 @@
 
 /***/ },
 /* 3 */
+/***/ function(module, exports) {
+
+	/*
+	 * Navbar with Dropdown
+	 */
+
+	var Nav = ReactBootstrap.Nav;
+	var Navbar = ReactBootstrap.Navbar;
+	var NavItem = ReactBootstrap.NavItem;
+	var MenuItem = ReactBootstrap.MenuItem;
+	var NavBrand = ReactBootstrap.NavBrand;
+	var NavDropdown = ReactBootstrap.NavDropdown;
+
+	var NavBar = React.createClass({displayName: "NavBar",
+	  render: function() {
+	    return (
+	      React.createElement("div", {id: "nav"}, 
+	        React.createElement(Navbar, {inverse: true, toggleNavKey: 0, fluid: true}, 
+	          React.createElement(NavBrand, null, React.createElement("a", {href: "#"}, "DIP Dashboard ")), 
+	          React.createElement(Nav, {right: true, eventKey: 0}, " ", /* This is the eventKey referenced */
+	            React.createElement(NavDropdown, {eventKey: 3, title: "Account", id: "collapsible-navbar-dropdown"}, 
+	              React.createElement(MenuItem, {eventKey: "1"}, "Action"), 
+	              React.createElement(MenuItem, {eventKey: "2"}, "Another action"), 
+	              React.createElement(MenuItem, {eventKey: "3"}, "Something else here"), 
+	              React.createElement(MenuItem, {divider: true}), 
+	              React.createElement(MenuItem, {eventKey: "4"}, "Logout")
+	            )
+	          )
+	        )
+	      )
+	    );
+	  }
+	});
+
+	module.exports = NavBar;
+
+
+/***/ },
+/* 4 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+	var React = __webpack_require__(1);
+	var ReactDOM = __webpack_require__(2);
+
+	var Button = ReactBootstrap.Button;
+	var Glyphicon = ReactBootstrap.Glyphicon;
+
+	var Well = ReactBootstrap.Well;
+	var Panel = ReactBootstrap.Panel;
+
+	var ListGroup = ReactBootstrap.ListGroup;
+	var ListGroupItem = ReactBootstrap.ListGroupItem;
+
+	var SlideMenu = React.createClass({displayName: "SlideMenu",
+	  toggleMenu: function(open) {
+	    var menu = document.getElementById("menu");
+	    menu.style['-webkit-transition'] = "right .5s ease-in-out";
+	    menu.style['-moz-transition'] = "right .5s ease-in-out";
+	    menu.style['-o-transition'] = "right .5s ease-in-out";
+	    menu.style['transition'] = "right .5s ease-in-out";
+	    menu.style['right'] = open ? '0px' : '-24.2%';
+	  }
+	, clicked: function() {
+	  console.log("I was clicked")
+	  console.log($('.table-body').eq(0))
+	  console.log(this.refs.table.props.children[1].props.children)
+	  }
+	, getInitialState: function() {
+	    return {
+	      isMenuOpen: false
+	    };
+	  }
+	, render: function() {
+	    return (
+	      React.createElement("div", {id: "menu", move: "0px", onMouseOver: this.toggleMenu.bind(this, true)}, 
+	        React.createElement(Glyphicon, {className: "pull-right closeMenu text-danger", glyph: "remove", onClick: this.toggleMenu.bind(this, false)}), 
+	        React.createElement("h3", {className: "menuTitle"},  this.props.title), 
+	        React.createElement(Well, {bsSize: "small", className: "deliveries"}, 
+	          React.createElement(ListGroup, null, 
+	            React.createElement(ListGroupItem, {href: "#link1", bsSize: "small"}, "Link 1"), 
+	            React.createElement(ListGroupItem, {href: "#link1", bsSize: "small", bsStyle: "danger"}, "ERROR"), 
+	            React.createElement(ListGroupItem, {href: "#link1", bsSize: "small"}, "Link 1"), 
+	            React.createElement(ListGroupItem, {href: "#link1", bsSize: "small", bsStyle: "success"}, "Link 1"), 
+	            React.createElement(ListGroupItem, {href: "#link1", bsSize: "small"}, "Link 1"), 
+	            React.createElement(ListGroupItem, {href: "#link1", bsSize: "small", bsStyle: "success"}, "Link 1"), 
+	            React.createElement(ListGroupItem, {href: "#link1", bsSize: "small"}, "Link 1"), 
+	            React.createElement(ListGroupItem, {href: "#link1", bsSize: "small", bsStyle: "success"}, "Link 1"), 
+	            React.createElement(ListGroupItem, {href: "#link1", bsSize: "small"}, "Link 1"), 
+	            React.createElement(ListGroupItem, {href: "#link1", bsSize: "small"}, "Link 1")
+	          )
+	        )
+	      )
+	    );
+	  }
+	});
+
+	module.exports = SlideMenu
+
+
+/***/ },
+/* 5 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var React = __webpack_require__(1);

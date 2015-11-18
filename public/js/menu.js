@@ -32,34 +32,26 @@ var SlideMenu = React.createClass({
   }
 , render: function() {
     return (
-      <div id="content-block">
-        <div id="menu" move="0px" onMouseOver={this.toggleMenu.bind(this, true)} >
-          <Glyphicon className="pull-right closeMenu text-danger" glyph="remove" onClick={this.toggleMenu.bind(this, false)} />
-          <h3 className="menuTitle">{ this.props.title }</h3>
-          <Well bsSize="small" className="deliveries">
-            <ListGroup>
-              <ListGroupItem href="#link1" bsSize="small">Link 1</ListGroupItem>
-              <ListGroupItem href="#link1" bsSize="small" bsStyle="danger">ERROR</ListGroupItem>
-              <ListGroupItem href="#link1" bsSize="small">Link 1</ListGroupItem>
-              <ListGroupItem href="#link1" bsSize="small" bsStyle="success">Link 1</ListGroupItem>
-              <ListGroupItem href="#link1" bsSize="small">Link 1</ListGroupItem>
-              <ListGroupItem href="#link1" bsSize="small" bsStyle="success">Link 1</ListGroupItem>
-              <ListGroupItem href="#link1" bsSize="small">Link 1</ListGroupItem>
-              <ListGroupItem href="#link1" bsSize="small" bsStyle="success">Link 1</ListGroupItem>
-              <ListGroupItem href="#link1" bsSize="small">Link 1</ListGroupItem>
-              <ListGroupItem href="#link1" bsSize="small">Link 1</ListGroupItem>
-            </ListGroup>
-          </Well>
-        </div>
-        <div id="left" classN="col-md-12">
-        
-        </div>
+      <div id="menu" move="0px" onMouseOver={this.toggleMenu.bind(this, true)} >
+        <Glyphicon className="pull-right closeMenu text-danger" glyph="remove" onClick={this.toggleMenu.bind(this, false)} />
+        <h3 className="menuTitle">{ this.props.title }</h3>
+        <Well bsSize="small" className="deliveries">
+          <ListGroup>
+            <ListGroupItem href="#link1" bsSize="small">Link 1</ListGroupItem>
+            <ListGroupItem href="#link1" bsSize="small" bsStyle="danger">ERROR</ListGroupItem>
+            <ListGroupItem href="#link1" bsSize="small">Link 1</ListGroupItem>
+            <ListGroupItem href="#link1" bsSize="small" bsStyle="success">Link 1</ListGroupItem>
+            <ListGroupItem href="#link1" bsSize="small">Link 1</ListGroupItem>
+            <ListGroupItem href="#link1" bsSize="small" bsStyle="success">Link 1</ListGroupItem>
+            <ListGroupItem href="#link1" bsSize="small">Link 1</ListGroupItem>
+            <ListGroupItem href="#link1" bsSize="small" bsStyle="success">Link 1</ListGroupItem>
+            <ListGroupItem href="#link1" bsSize="small">Link 1</ListGroupItem>
+            <ListGroupItem href="#link1" bsSize="small">Link 1</ListGroupItem>
+          </ListGroup>
+        </Well>
       </div>
     );
   }
 });
 
-ReactDOM.render(
-  <SlideMenu title="Deliveries" />,
-  document.getElementById('content')
-);
+module.exports = SlideMenu
