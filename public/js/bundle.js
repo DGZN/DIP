@@ -243,15 +243,14 @@
 	    this.setState({ checked: !this.state.checked, override: true })
 	  },
 	  componentWillReceiveProps: function(nextProps) {
-	    var state = this.state
-	    if (nextProps.override) var state = nextProps
-	    this.setState(state)
+	    if (nextProps.override)
+	      this.setState(nextProps)
 	  },
 	  render: function() {
-
-	    var isChecked = this.props.override
-	      ? this.props.checked
-	      : this.state.checked;
+	    if (this.props.override)
+	      var isChecked = this.props.checked
+	    if (this.state.override)
+	      var isChecked = this.state.checked
 	    var checked = isChecked
 	      ? React.createElement(Input, {type: "checkbox", onChange: this.handleCheck, checked: true, label: "1"})
 	      : React.createElement(Input, {type: "checkbox", onChange: this.handleCheck, label: "1"})
