@@ -73,7 +73,7 @@
 	    );
 	  },
 	  componentDidMount: function() {
-	    $.get('http://localhost:8000/v1/assets/series/seasons/episodes', function(result) {
+	    $.get('http://api.opendev.oscars.org/v1/assets/films', function(result) {
 	      if (this.isMounted()) {
 	        this.setState({ rows: result, columns: Object.keys(result[0]) });
 	      }
@@ -307,8 +307,8 @@
 	        if (a[field].length < 1 || b[field].length < 1) {
 	          var aVal = (a[field] || ' ')
 	          var bVal = (b[field] || ' ')
-	          if(aVal < bVal) return negative;
-	          if(aVal > bVal) return positive;
+	          if(aVal < bVal) return positive;
+	          if(aVal > bVal) return negative;
 	        }
 	        if (isNaN(a[field])) {
 	          if(a[field] < b[field]) return negative;

@@ -101,8 +101,8 @@ var Table = React.createClass({
         if (a[field].length < 1 || b[field].length < 1) {
           var aVal = (a[field] || ' ')
           var bVal = (b[field] || ' ')
-          if(aVal < bVal) return negative;
-          if(aVal > bVal) return positive;
+          if(aVal < bVal) return positive;
+          if(aVal > bVal) return negative;
         }
         if (isNaN(a[field])) {
           if(a[field] < b[field]) return negative;
