@@ -11,26 +11,26 @@ var Row = React.createClass({
   getInitialState: function() {
     return {
       viewed: false
-    , rowChecks: {}
+    , checked: this.props.checked
+    , override: false
     };
   },
   handleClick: function(){
     this.setState({viewed: true});
   },
-  handleCheck: function(props) {
-    var checks = this.state.rowChecks
-    checks[props.rowID] = {
-      checked: !props.checked
-    }
-    this.setState({ rowChecks: checks })
+  handleCheck: function() {
+    this.setState({ checked: !this.props.checked, override: true })
+  },
+  componentWillReceiveProps: function(nextProps) {
+    this.setState({
+      override: false
+    })
   },
   render: function() {
-    var isChecked = this.props.checked
-    if ( typeof this.state.rowChecks[this.props.rowID] !== "undefined" )
-      isChecked = this.state.rowChecks[this.props.rowID].checked
+    var isChecked = this.state.override ? this.state.checked : this.props.checked;
     var checked = isChecked
-      ? <Input type="checkbox" onChange={this.handleCheck.bind(this, this.props)} checked label="1" />
-      : <Input type="checkbox" onChange={this.handleCheck.bind(this, this.props)} label="1" />
+      ? <Input type="checkbox" onChange={this.handleCheck} checked label="1" />
+      : <Input type="checkbox" onChange={this.handleCheck} label="1" />
     return (
         <tr>
           <td className="rowID">

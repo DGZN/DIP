@@ -232,29 +232,26 @@
 	  getInitialState: function() {
 	    return {
 	      viewed: false
-	    , rowChecks: {}
+	    , checked: this.props.checked
+	    , override: false
 	    };
 	  },
 	  handleClick: function(){
 	    this.setState({viewed: true});
 	  },
-	  handleCheck: function(props) {
-	    var checks = this.state.rowChecks
-	    checks[props.rowID] = {
-	      checked: !props.checked
-	    }
-	    this.setState({ rowChecks: checks })
+	  handleCheck: function() {
+	    this.setState({ checked: !this.props.checked, override: true })
+	  },
+	  componentWillReceiveProps: function(nextProps) {
+	    this.setState({
+	      override: false
+	    })
 	  },
 	  render: function() {
-	    // var rowChecked = this.state.checked.indexOf(this.props.rowID) > -1 ? true : false;
-	    // console.log("rowChecked", rowChecked, 'checked', this.props.checked);
-	    var isChecked = this.props.checked
-	    if ( typeof this.state.rowChecks[this.props.rowID] !== "undefined" ) {
-	      isChecked = this.state.rowChecks[this.props.rowID].checked
-	    }
+	    var isChecked = this.state.override ? this.state.checked : this.props.checked;
 	    var checked = isChecked
-	      ? React.createElement(Input, {type: "checkbox", onChange: this.handleCheck.bind(this, this.props), checked: true, label: "1"})
-	      : React.createElement(Input, {type: "checkbox", onChange: this.handleCheck.bind(this, this.props), label: "1"})
+	      ? React.createElement(Input, {type: "checkbox", onChange: this.handleCheck, checked: true, label: "1"})
+	      : React.createElement(Input, {type: "checkbox", onChange: this.handleCheck, label: "1"})
 	    return (
 	        React.createElement("tr", null, 
 	          React.createElement("td", {className: "rowID"}, 
