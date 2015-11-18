@@ -11,23 +11,26 @@ var Row = React.createClass({
   getInitialState: function() {
     return {
       viewed: false
-    , checked: this.props.checked
-    , override: false
+    , checked:  this.props.checked
+    , override: this.props.override
     };
   },
   handleClick: function(){
     this.setState({viewed: true});
   },
   handleCheck: function() {
-    this.setState({ checked: !this.props.checked, override: true })
+    this.setState({ checked: !this.state.checked, override: true })
   },
   componentWillReceiveProps: function(nextProps) {
-    this.setState({
-      override: false
-    })
+    var state = this.state
+    if (nextProps.override) var state = nextProps
+    this.setState(state)
   },
   render: function() {
-    var isChecked = this.state.override ? this.state.checked : this.props.checked;
+
+    var isChecked = this.props.override
+      ? this.props.checked
+      : this.state.checked;
     var checked = isChecked
       ? <Input type="checkbox" onChange={this.handleCheck} checked label="1" />
       : <Input type="checkbox" onChange={this.handleCheck} label="1" />
@@ -49,6 +52,7 @@ var Table = React.createClass({
     return {
       sortField: ''
     , checked: false
+    , override: false
     };
   }
 , render: function() {
@@ -67,7 +71,7 @@ var Table = React.createClass({
       })
       .map(function(row, i){
         i++;
-        return <Row key={row.title} rowID={i} row={row} checked={state.checked}  />;
+        return <Row key={row.title} rowID={i} row={row} checked={state.checked} sortField={state.sortField} override={state.override}  />;
       });
     return (
         <div className="row spacer">
@@ -88,10 +92,10 @@ var Table = React.createClass({
     );
   }
 , handleClick: function(sortField) {
-    this.setState({ sortField: sortField })
+    this.setState({ sortField: sortField, override: false })
   }
 , handleCheck: function() {
-    this.setState({ checked: !this.state.checked })
+    this.setState({ checked: !this.state.checked, override: true })
   }
 });
 

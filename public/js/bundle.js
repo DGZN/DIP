@@ -232,23 +232,26 @@
 	  getInitialState: function() {
 	    return {
 	      viewed: false
-	    , checked: this.props.checked
-	    , override: false
+	    , checked:  this.props.checked
+	    , override: this.props.override
 	    };
 	  },
 	  handleClick: function(){
 	    this.setState({viewed: true});
 	  },
 	  handleCheck: function() {
-	    this.setState({ checked: !this.props.checked, override: true })
+	    this.setState({ checked: !this.state.checked, override: true })
 	  },
 	  componentWillReceiveProps: function(nextProps) {
-	    this.setState({
-	      override: false
-	    })
+	    var state = this.state
+	    if (nextProps.override) var state = nextProps
+	    this.setState(state)
 	  },
 	  render: function() {
-	    var isChecked = this.state.override ? this.state.checked : this.props.checked;
+
+	    var isChecked = this.props.override
+	      ? this.props.checked
+	      : this.state.checked;
 	    var checked = isChecked
 	      ? React.createElement(Input, {type: "checkbox", onChange: this.handleCheck, checked: true, label: "1"})
 	      : React.createElement(Input, {type: "checkbox", onChange: this.handleCheck, label: "1"})
@@ -270,6 +273,7 @@
 	    return {
 	      sortField: ''
 	    , checked: false
+	    , override: false
 	    };
 	  }
 	, render: function() {
@@ -288,7 +292,7 @@
 	      })
 	      .map(function(row, i){
 	        i++;
-	        return React.createElement(Row, {key: row.title, rowID: i, row: row, checked: state.checked});
+	        return React.createElement(Row, {key: row.title, rowID: i, row: row, checked: state.checked, sortField: state.sortField, override: state.override});
 	      });
 	    return (
 	        React.createElement("div", {className: "row spacer"}, 
@@ -309,10 +313,10 @@
 	    );
 	  }
 	, handleClick: function(sortField) {
-	    this.setState({ sortField: sortField })
+	    this.setState({ sortField: sortField, override: false })
 	  }
 	, handleCheck: function() {
-	    this.setState({ checked: !this.state.checked })
+	    this.setState({ checked: !this.state.checked, override: true })
 	  }
 	});
 
