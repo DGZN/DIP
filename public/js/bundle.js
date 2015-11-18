@@ -51,62 +51,35 @@
 	var SlideMenu = __webpack_require__(4);
 	var DataTable = __webpack_require__(5);
 
-
-	var rows = [{
-	    title : "A",
-	    description: "F",
-	    date: "Cat",
-	    link: "123"
-	  },{
-	    title : "B",
-	    description: "E",
-	    date: "TRain",
-	    link: "123"
-	  },{
-	    title : "C",
-	    description: "D",
-	    date: "Zed",
-	    link: "123"
-	  },{
-	    title : "E",
-	    description: "C",
-	    date: "Frog",
-	    link: "123"
-	  },{
-	    title : "F",
-	    description: "B",
-	    date: "Lobster",
-	    link: "123"
-	  },{
-	    title : "D",
-	    description: "A",
-	    date: "Orange",
-	    link: "456"
-	  }
-	];
-
-
 	var App = React.createClass({displayName: "App",
 	  getInitialState: function() {
 	    return {
 	      isMenuOpen: false
+	    , rows: [{}]
+	    , columns: []
 	    };
-	  }
-	, render: function() {
+	  },
+	  render: function() {
 	    return (
 	      React.createElement("div", null, 
 	        React.createElement(NavBar, null), 
 	        React.createElement("div", {className: "container-fluid"}, 
 	          React.createElement(SlideMenu, null), 
 	          React.createElement("div", {id: "left", className: "col-md-12"}, 
-	            React.createElement(DataTable, {ref: "datatable", rows: rows, columns: Object.keys(rows[0])})
+	            React.createElement(DataTable, {ref: "datatable", rows: this.state.rows, columns: this.state.columns})
 	          )
 	        )
 	      )
 	    );
+	  },
+	  componentDidMount: function() {
+	    $.get('http://localhost:8000/v1/assets/series/seasons/episodes', function(result) {
+	      if (this.isMounted()) {
+	        this.setState({ rows: result, columns: Object.keys(result[0]) });
+	      }
+	    }.bind(this));
 	  }
 	});
-
 	ReactDOM.render(
 	  React.createElement(App, null),
 	  document.getElementById('content')
@@ -289,16 +262,29 @@
 	      sortField: ''
 	    , checked: false
 	    , override: this.props.override || false
+	    , columns: this.props.columns
 	    };
+	  },
+	  componentWillReceiveProps: function(props) {
+	    this.setState(props)
 	  },
 	  render: function() {
 	    var props = this.props;
 	    var state = this.state
 	    var self = this
-	    var columns = props.columns
+	    var negative = -1
+	    var positive = 1;
+	    if (state.reverse) {
+	      var negative = 1;
+	      var positive = -1;
+	    }
+	    var columns = state.columns
 	      .map(function(column, i){
+	        var selected = state.sortField == column
+	          ? 'sort-selection-field'
+	          : '';
 	        return (
-	          React.createElement("th", {key: i, onClick: self.handleClick.bind(self, column)}, 
+	          React.createElement("th", {key: i, className: selected, onClick: self.handleClick.bind(self, column)}, 
 	            column.toUpperCase()
 	          )
 	        )
@@ -307,8 +293,10 @@
 	      .filter(function(row){
 	        row.hidden = true;
 	        props.columns.forEach(function(field, i){
-	          if (row[field].toLowerCase().indexOf(props.filterText.toLowerCase()) > -1) {
-	            row.hidden = false
+	          if (row.hasOwnProperty(field) && row[field].length > 0) {
+	            if (row[field].toLowerCase().indexOf(props.filterText.toLowerCase()) > -1) {
+	              row.hidden = false
+	            }
 	          }
 	        })
 	        return true;
@@ -316,20 +304,30 @@
 	      .sort(function(a, b){
 	        if (!state.sortField) return;
 	        var field = state.sortField;
-	        if(a[field] < b[field]) return -1;
-	        if(a[field] > b[field]) return 1;
-	        return 0;
+	        if (a[field].length < 1 || b[field].length < 1) {
+	          var aVal = (a[field] || ' ')
+	          var bVal = (b[field] || ' ')
+	          if(aVal < bVal) return negative;
+	          if(aVal > bVal) return positive;
+	        }
+	        if (isNaN(a[field])) {
+	          if(a[field] < b[field]) return negative;
+	          if(a[field] > b[field]) return positive;
+	        } else {
+	          if(parseInt(a[field]) < parseInt(b[field])) return negative;
+	          if(parseInt(a[field]) > parseInt(b[field])) return positive;
+	        }
 	      })
 	      .map(function(row, i){
 	        i++;
 	        return (
 	          React.createElement(Row, {
-	            key: row.title, 
+	            key: i, 
 	            rowID: i, row: row, 
 	            checked: state.checked, 
 	            sortField: state.sortField, 
 	            hidden: row.hidden ? true : false, 
-	            columns: props.columns, 
+	            columns: state.columns, 
 	            override: state.override})
 	        )
 	      });
@@ -339,7 +337,12 @@
 	            React.createElement(BSTable, {striped: true, bordered: true, hover: true}, 
 	                React.createElement("thead", {className: "data-table-thead"}, 
 	                  React.createElement("tr", null, 
-	                    React.createElement("th", null, React.createElement(Input, {type: "checkbox", standalone: true, onChange: this.handleCheck, label: " "})), 
+	                    React.createElement("th", null, 
+	                     state.columns.length < 1
+	                      ? (React.createElement("h3", {className: "waiting"}, " waiting for content ... "))
+	                      : React.createElement(Input, {type: "checkbox", standalone: true, onChange: this.handleCheck, label: " "})
+	                    
+	                    ), 
 	                    columns
 	                  )
 	                ), 
@@ -352,7 +355,11 @@
 	    );
 	  },
 	  handleClick: function(sortField) {
-	    this.setState({ sortField: sortField, override: false })
+	    if (this.state.sortField == sortField && !this.state.reverse) {
+	      return this.setState({ sortField: sortField, override: false, reverse: true })
+	    } else {
+	      return this.setState({ sortField: sortField, override: false, reverse: false })
+	    }
 	  },
 	  handleCheck: function() {
 	    this.setState({ checked: !this.state.checked, override: true })
@@ -389,6 +396,7 @@
 	  },
 
 	  render: function() {
+	    var columns = Object.keys(this.props.rows[0])
 	    return (
 	      React.createElement(Well, {className: "data-table-well"}, 
 	        React.createElement(SearchBar, {onUserInput: this.handleUserInput, filterText: this.state.filterText}), 

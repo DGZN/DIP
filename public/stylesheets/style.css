@@ -14,8 +14,28 @@ body {
   cursor: pointer !important;
 }
 
+.waiting {
+  position: relative;
+  margin: 0 auto;
+  width: 200px;
+  height: auto;
+  font-size: 15px;
+  font-weight: normal;
+  color: #2BBDED;
+  padding: 5px;
+  text-align: center;
+}
+
+.sort-selection-field {
+  background: rgba(0,0,0,.3);
+}
+
 .navbar-nav>li>.dropdown-menu {
   z-index: 999999;
+}
+
+.table>tbody>tr>td, .table>tbody>tr>th, .table>tfoot>tr>td, .table>tfoot>tr>th, .table>thead>tr>td, .table>thead>tr>th {
+  vertical-align: middle !important;
 }
 
 #content-block {

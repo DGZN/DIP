@@ -56,16 +56,29 @@ var Table = React.createClass({
       sortField: ''
     , checked: false
     , override: this.props.override || false
+    , columns: this.props.columns
     };
+  },
+  componentWillReceiveProps: function(props) {
+    this.setState(props)
   },
   render: function() {
     var props = this.props;
     var state = this.state
     var self = this
-    var columns = props.columns
+    var negative = -1
+    var positive = 1;
+    if (state.reverse) {
+      var negative = 1;
+      var positive = -1;
+    }
+    var columns = state.columns
       .map(function(column, i){
+        var selected = state.sortField == column
+          ? 'sort-selection-field'
+          : '';
         return (
-          <th key={i} onClick={self.handleClick.bind(self, column)}>
+          <th key={i} className={selected} onClick={self.handleClick.bind(self, column)}>
             {column.toUpperCase()}
           </th>
         )
@@ -74,8 +87,10 @@ var Table = React.createClass({
       .filter(function(row){
         row.hidden = true;
         props.columns.forEach(function(field, i){
-          if (row[field].toLowerCase().indexOf(props.filterText.toLowerCase()) > -1) {
-            row.hidden = false
+          if (row.hasOwnProperty(field) && row[field].length > 0) {
+            if (row[field].toLowerCase().indexOf(props.filterText.toLowerCase()) > -1) {
+              row.hidden = false
+            }
           }
         })
         return true;
@@ -83,20 +98,30 @@ var Table = React.createClass({
       .sort(function(a, b){
         if (!state.sortField) return;
         var field = state.sortField;
-        if(a[field] < b[field]) return -1;
-        if(a[field] > b[field]) return 1;
-        return 0;
+        if (a[field].length < 1 || b[field].length < 1) {
+          var aVal = (a[field] || ' ')
+          var bVal = (b[field] || ' ')
+          if(aVal < bVal) return negative;
+          if(aVal > bVal) return positive;
+        }
+        if (isNaN(a[field])) {
+          if(a[field] < b[field]) return negative;
+          if(a[field] > b[field]) return positive;
+        } else {
+          if(parseInt(a[field]) < parseInt(b[field])) return negative;
+          if(parseInt(a[field]) > parseInt(b[field])) return positive;
+        }
       })
       .map(function(row, i){
         i++;
         return (
           <Row
-            key={row.title}
+            key={i}
             rowID={i} row={row}
             checked={state.checked}
             sortField={state.sortField}
             hidden={row.hidden ? true : false}
-            columns={props.columns}
+            columns={state.columns}
             override={state.override}  />
         )
       });
@@ -106,7 +131,12 @@ var Table = React.createClass({
             <BSTable striped={true} bordered={true} hover={true}>
                 <thead className="data-table-thead">
                   <tr>
-                    <th><Input type="checkbox" standalone onChange={this.handleCheck} label=" " /></th>
+                    <th>
+                    { state.columns.length < 1
+                      ? (<h3 className="waiting"> waiting for content ... </h3>)
+                      : <Input type="checkbox" standalone onChange={this.handleCheck} label=" " />
+                    }
+                    </th>
                     {columns}
                   </tr>
                 </thead>
@@ -119,7 +149,11 @@ var Table = React.createClass({
     );
   },
   handleClick: function(sortField) {
-    this.setState({ sortField: sortField, override: false })
+    if (this.state.sortField == sortField && !this.state.reverse) {
+      return this.setState({ sortField: sortField, override: false, reverse: true })
+    } else {
+      return this.setState({ sortField: sortField, override: false, reverse: false })
+    }
   },
   handleCheck: function() {
     this.setState({ checked: !this.state.checked, override: true })
@@ -156,6 +190,7 @@ var DataTable = React.createClass({
   },
 
   render: function() {
+    var columns = Object.keys(this.props.rows[0])
     return (
       <Well className="data-table-well">
         <SearchBar onUserInput={this.handleUserInput} filterText={this.state.filterText} />
