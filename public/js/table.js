@@ -128,7 +128,7 @@ var Table = React.createClass({
     return (
         <div className="row spacer">
           <div>
-            <BSTable striped={true} bordered={true} hover={true}>
+            <BSTable className="dataTable" striped={true} bordered={true} hover={true}>
                 <thead className="data-table-thead">
                   <tr>
                     <th>

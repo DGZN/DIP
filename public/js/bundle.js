@@ -334,7 +334,7 @@
 	    return (
 	        React.createElement("div", {className: "row spacer"}, 
 	          React.createElement("div", null, 
-	            React.createElement(BSTable, {striped: true, bordered: true, hover: true}, 
+	            React.createElement(BSTable, {className: "dataTable", striped: true, bordered: true, hover: true}, 
 	                React.createElement("thead", {className: "data-table-thead"}, 
 	                  React.createElement("tr", null, 
 	                    React.createElement("th", null, 

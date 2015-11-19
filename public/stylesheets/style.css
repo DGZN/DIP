@@ -5,6 +5,11 @@ body {
   background-image: url('../images/panel_bck.jpg');
 }
 
+.dataTable {
+  max-height: 500px;
+  overflow: scroll;
+}
+
 .hidden {
   display: none;
 }
@@ -48,6 +53,8 @@ body {
 }
 
 .data-table-well {
+  max-height: 99%;
+  overflow: scroll;
   padding: 25px;
 }
 
