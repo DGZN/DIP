@@ -6,8 +6,9 @@ body {
 }
 
 .dataTable {
-  max-height: 500px;
+  max-height: 1050px;
   overflow: scroll;
+  display: block;
 }
 
 .hidden {
@@ -31,8 +32,17 @@ body {
   text-align: center;
 }
 
+.highlighted {
+  color: #a8d1ff;
+  font-weight: bold;
+  line-height: 1em;
+  padding: 0 3px 2px 3px;
+  background-color: rgba(0,0,0,.7)
+}
+
 .sort-selection-field {
-  background: rgba(0,0,0,.3);
+  border: 2px solid rgba(0,0,0,.5) !important;
+  background: rgba(190,190,190,.3) !important;
 }
 
 .navbar-nav>li>.dropdown-menu {
@@ -44,7 +54,11 @@ body {
 }
 
 .table>tbody>tr>td {
-  /*text-align: center;*/
+  text-align: center;
+}
+
+.table>tbody>tr td:nth-child(4) {
+  text-align: left;
 }
 
 #content-block {

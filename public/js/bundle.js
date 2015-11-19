@@ -241,9 +241,11 @@
 	      ? React.createElement(Input, {type: "checkbox", onChange: this.handleCheck, checked: true, label: " "})
 	      : React.createElement(Input, {type: "checkbox", onChange: this.handleCheck, label: " "})
 	    var cells = self.props.columns.map(function(cell, i){
-	      return (
-	        React.createElement("td", {key: i}, self.props.row[cell])
-	      )
+	      var regex = new RegExp( '(' + self.props.filterText + ')', 'gi' );
+	      var html = self.props.row[cell];
+	      if (self.props.filterText.length >= 3)
+	        html = html.toString().replace(regex, '<span class="highlighted">$1</span>');
+	      return React.createElement("td", {key: i, dangerouslySetInnerHTML: { "__html": html}});
 	    })
 	    return (
 	        React.createElement("tr", {className: this.props.hidden ? 'hidden' : ''}, 
@@ -285,7 +287,7 @@
 	          : '';
 	        return (
 	          React.createElement("th", {key: i, className: selected, onClick: self.handleClick.bind(self, column)}, 
-	            column.toUpperCase()
+	            column.charAt(0).toUpperCase() + column.slice(1)
 	          )
 	        )
 	      })
@@ -323,14 +325,23 @@
 	        return (
 	          React.createElement(Row, {
 	            key: i, 
-	            rowID: i, row: row, 
+	            rowID: i, 
+	            row: row, 
 	            checked: state.checked, 
 	            sortField: state.sortField, 
 	            hidden: row.hidden ? true : false, 
+	            filterText: state.filterText, 
 	            columns: state.columns, 
 	            override: state.override})
 	        )
 	      });
+	    if (state.columns.length < 1) {
+	      return (
+	          React.createElement("div", {className: "row spacer"}, 
+	            React.createElement("div", {className: "waiting"}, " waiting for content ... ")
+	          )
+	      )
+	    }
 	    return (
 	        React.createElement("div", {className: "row spacer"}, 
 	          React.createElement("div", null, 
@@ -338,10 +349,7 @@
 	                React.createElement("thead", {className: "data-table-thead"}, 
 	                  React.createElement("tr", null, 
 	                    React.createElement("th", null, 
-	                     state.columns.length < 1
-	                      ? (React.createElement("h3", {className: "waiting"}, " waiting for content ... "))
-	                      : React.createElement(Input, {type: "checkbox", standalone: true, onChange: this.handleCheck, label: " "})
-	                    
+	                      React.createElement(Input, {type: "checkbox", standalone: true, onChange: this.handleCheck, label: " "})
 	                    ), 
 	                    columns
 	                  )
@@ -363,6 +371,13 @@
 	  },
 	  handleCheck: function() {
 	    this.setState({ checked: !this.state.checked, override: true })
+	  },
+	  highlightMatches: function(row, keyword) {
+	    this.state.columns.forEach(function(column, i) {
+	      row[column].toString().replace(['<span class="highlighted">','</span>',['','']])
+	      row[column] = row[column].toString().replace(keyword, '<span class="highlighted">' + keyword + '</span>')
+	    })
+	    return row;
 	  }
 	});
 
@@ -376,7 +391,7 @@
 	    return (
 	      React.createElement("div", {className: "row table-search"}, 
 	        React.createElement("form", {className: "form-grop", onSubmit: this.handleSubmit}, 
-	            React.createElement("input", {ref: "filterTextInput", type: "search", className: "form-control input-lg", value: this.props.filterText, onChange: this.handleChange, placeholder: "Search for packages", "aria-describedby": "sizing-addon1"})
+	            React.createElement("input", {ref: "filterTextInput", type: "search", autoFocus: true, className: "form-control input-lg", value: this.props.filterText, onChange: this.handleChange, placeholder: "Search for packages", "aria-describedby": "sizing-addon1"})
 	        )
 	      )
 	    );

@@ -35,9 +35,11 @@ var Row = React.createClass({
       ? <Input type="checkbox" onChange={this.handleCheck} checked label=" " />
       : <Input type="checkbox" onChange={this.handleCheck} label=" " />
     var cells = self.props.columns.map(function(cell, i){
-      return (
-        <td key={i}>{self.props.row[cell]}</td>
-      )
+      var regex = new RegExp( '(' + self.props.filterText + ')', 'gi' );
+      var html = self.props.row[cell];
+      if (self.props.filterText.length >= 3)
+        html = html.toString().replace(regex, '<span class="highlighted">$1</span>');
+      return <td key={i} dangerouslySetInnerHTML={{ "__html": html }}></td>;
     })
     return (
         <tr className={this.props.hidden ? 'hidden' : ''}>
@@ -79,7 +81,7 @@ var Table = React.createClass({
           : '';
         return (
           <th key={i} className={selected} onClick={self.handleClick.bind(self, column)}>
-            {column.toUpperCase()}
+            {column.charAt(0).toUpperCase() + column.slice(1)}
           </th>
         )
       })
@@ -117,14 +119,23 @@ var Table = React.createClass({
         return (
           <Row
             key={i}
-            rowID={i} row={row}
+            rowID={i}
+            row={row}
             checked={state.checked}
             sortField={state.sortField}
             hidden={row.hidden ? true : false}
+            filterText={state.filterText}
             columns={state.columns}
             override={state.override}  />
         )
       });
+    if (state.columns.length < 1) {
+      return (
+          <div className="row spacer">
+            <div className="waiting"> waiting for content ... </div>
+          </div>
+      )
+    }
     return (
         <div className="row spacer">
           <div>
@@ -132,10 +143,7 @@ var Table = React.createClass({
                 <thead className="data-table-thead">
                   <tr>
                     <th>
-                    { state.columns.length < 1
-                      ? (<h3 className="waiting"> waiting for content ... </h3>)
-                      : <Input type="checkbox" standalone onChange={this.handleCheck} label=" " />
-                    }
+                      <Input type="checkbox" standalone onChange={this.handleCheck} label=" " />
                     </th>
                     {columns}
                   </tr>
@@ -157,6 +165,13 @@ var Table = React.createClass({
   },
   handleCheck: function() {
     this.setState({ checked: !this.state.checked, override: true })
+  },
+  highlightMatches: function(row, keyword) {
+    this.state.columns.forEach(function(column, i) {
+      row[column].toString().replace(['<span class="highlighted">','</span>',['','']])
+      row[column] = row[column].toString().replace(keyword, '<span class="highlighted">' + keyword + '</span>')
+    })
+    return row;
   }
 });
 
@@ -170,7 +185,7 @@ var SearchBar = React.createClass({
     return (
       <div className="row table-search">
         <form className="form-grop" onSubmit={this.handleSubmit}>
-            <input ref="filterTextInput" type="search" className="form-control input-lg" value={this.props.filterText} onChange={this.handleChange} placeholder="Search for packages" aria-describedby="sizing-addon1"></input>
+            <input ref="filterTextInput" type="search" autoFocus className="form-control input-lg" value={this.props.filterText} onChange={this.handleChange} placeholder="Search for packages" aria-describedby="sizing-addon1"></input>
         </form>
       </div>
     );

@@ -27,7 +27,7 @@ var App = React.createClass({
     );
   },
   componentDidMount: function() {
-    $.get('http://localhost:8000/v1/assets/series/seasons/episodes', function(result) {
+    $.get('http://api.opendev.oscars.org/v1/assets/films', function(result) {
       if (this.isMounted()) {
         this.setState({ rows: result, columns: Object.keys(result[0]) });
       }
