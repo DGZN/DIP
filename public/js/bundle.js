@@ -64,7 +64,7 @@
 	      React.createElement("div", null, 
 	        React.createElement(NavBar, null), 
 	        React.createElement("div", {className: "container-fluid"}, 
-	          React.createElement(SlideMenu, null), 
+	          /* <SlideMenu /> */ 
 	          React.createElement("div", {id: "left", className: "col-md-12"}, 
 	            React.createElement(DataTable, {ref: "datatable", rows: this.state.rows, columns: this.state.columns})
 	          )
@@ -212,6 +212,9 @@
 
 	var Input = ReactBootstrap.Input;
 	var Check = ReactBootstrap.Check;
+
+	var DropdownButton = ReactBootstrap.DropdownButton;
+	var MenuItem = ReactBootstrap.MenuItem;
 
 	var Row = React.createClass({displayName: "Row",
 	  getInitialState: function() {
@@ -391,7 +394,13 @@
 	    return (
 	      React.createElement("div", {className: "row table-search"}, 
 	        React.createElement("form", {className: "form-grop", onSubmit: this.handleSubmit}, 
-	            React.createElement("input", {ref: "filterTextInput", type: "search", autoFocus: true, className: "form-control input-lg", value: this.props.filterText, onChange: this.handleChange, placeholder: "Search for packages", "aria-describedby": "sizing-addon1"})
+	          React.createElement("div", {className: "data-table-search-panel"}, 
+	            React.createElement("input", {ref: "filterTextInput", type: "search", autoFocus: true, className: "data-table-search-input form-control input-lg", value: this.props.filterText, onChange: this.handleChange, placeholder: "Search...", "aria-describedby": "sizing-addon1"}), 
+	            React.createElement(DropdownButton, {title: "Routes", id: "bg-nested-dropdown", bsSize: "lg", className: "data-table-filter-dropdown"}, 
+	              React.createElement(MenuItem, {eventKey: "1"}, "Route 1"), 
+	              React.createElement(MenuItem, {eventKey: "2"}, "Route 2")
+	            )
+	          )
 	        )
 	      )
 	    );

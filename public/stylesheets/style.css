@@ -11,6 +11,30 @@ body {
   display: block;
 }
 
+.data-table-search-input {
+  float: left;
+}
+
+.data-table-filter-dropdown {
+  position: absolute;
+  right: 25px;
+  float: right;
+  font-size: 15px !important;
+  color: rgba(0,0,0,.5);
+  margin: 2px 2px 2px 1px;
+  border: none !important;
+}
+
+.data-table-filter-dropdown .btn-default:hover {
+    color: #333;
+    opacity: .5;
+}
+
+.data-table-filter-dropdown .dropdown-menu {
+  left: -25px;
+}
+
+
 .hidden {
   display: none;
 }

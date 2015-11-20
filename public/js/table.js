@@ -7,6 +7,9 @@ var Well = ReactBootstrap.Well;
 var Input = ReactBootstrap.Input;
 var Check = ReactBootstrap.Check;
 
+var DropdownButton = ReactBootstrap.DropdownButton;
+var MenuItem = ReactBootstrap.MenuItem;
+
 var Row = React.createClass({
   getInitialState: function() {
     return {
@@ -139,7 +142,7 @@ var Table = React.createClass({
     return (
         <div className="row spacer">
           <div>
-            <BSTable className="dataTable" striped={true} bordered={true} hover={true}>
+            <BSTable className="dataTable" striped bordered hover >
                 <thead className="data-table-thead">
                   <tr>
                     <th>
@@ -185,7 +188,13 @@ var SearchBar = React.createClass({
     return (
       <div className="row table-search">
         <form className="form-grop" onSubmit={this.handleSubmit}>
-            <input ref="filterTextInput" type="search" autoFocus className="form-control input-lg" value={this.props.filterText} onChange={this.handleChange} placeholder="Search for packages" aria-describedby="sizing-addon1"></input>
+          <div className="data-table-search-panel">
+            <input ref="filterTextInput" type="search" autoFocus className="data-table-search-input form-control input-lg" value={this.props.filterText} onChange={this.handleChange} placeholder="Search..." aria-describedby="sizing-addon1"></input>
+            <DropdownButton title="Routes" id="bg-nested-dropdown" bsSize="lg" className="data-table-filter-dropdown">
+              <MenuItem eventKey="1">Route 1</MenuItem>
+              <MenuItem eventKey="2">Route 2</MenuItem>
+            </DropdownButton>
+          </div>
         </form>
       </div>
     );

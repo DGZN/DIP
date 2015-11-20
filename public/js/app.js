@@ -18,7 +18,7 @@ var App = React.createClass({
       <div>
         <NavBar />
         <div className="container-fluid">
-          <SlideMenu />
+          { /* <SlideMenu /> */ }
           <div id="left" className="col-md-12">
             <DataTable ref="datatable" rows={this.state.rows} columns={this.state.columns} />
           </div>
