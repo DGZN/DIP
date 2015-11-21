@@ -51,6 +51,12 @@
 	var SlideMenu = __webpack_require__(4);
 	var DataTable = __webpack_require__(5);
 
+	var routes = {
+	  'Oscars': 'http://api.opendev.oscars.org/v1/assets/films'
+	, 'Melody': 'http://localhost:8000/v1/assets/movies'
+	, 'Seasons':  'http://localhost:8000/v1/assets/series/seasons/episodes'
+	};
+
 	var App = React.createClass({displayName: "App",
 	  getInitialState: function() {
 	    return {
@@ -64,20 +70,13 @@
 	      React.createElement("div", null, 
 	        React.createElement(NavBar, null), 
 	        React.createElement("div", {className: "container-fluid"}, 
-	          /* <SlideMenu /> */ 
+	          React.createElement(SlideMenu, null), 
 	          React.createElement("div", {id: "left", className: "col-md-12"}, 
-	            React.createElement(DataTable, {ref: "datatable", rows: this.state.rows, columns: this.state.columns})
+	            React.createElement(DataTable, {ref: "datatable", rows: this.state.rows, columns: this.state.columns, routes: routes})
 	          )
 	        )
 	      )
 	    );
-	  },
-	  componentDidMount: function() {
-	    $.get('http://api.opendev.oscars.org/v1/assets/films', function(result) {
-	      if (this.isMounted()) {
-	        this.setState({ rows: result, columns: Object.keys(result[0]) });
-	      }
-	    }.bind(this));
 	  }
 	});
 	ReactDOM.render(
@@ -204,17 +203,14 @@
 /* 5 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var React = __webpack_require__(1);
-	var ReactDOM = __webpack_require__(2);
-
-	var BSTable = ReactBootstrap.Table;
-	var Well = ReactBootstrap.Well;
-
-	var Input = ReactBootstrap.Input;
-	var Check = ReactBootstrap.Check;
-
-	var DropdownButton = ReactBootstrap.DropdownButton;
-	var MenuItem = ReactBootstrap.MenuItem;
+	     var React = __webpack_require__(1),
+	      ReactDOM = __webpack_require__(2),
+	          Well = ReactBootstrap.Well,
+	         Input = ReactBootstrap.Input,
+	         Check = ReactBootstrap.Check,
+	       BSTable = ReactBootstrap.Table,
+	      MenuItem = ReactBootstrap.MenuItem,
+	DropdownButton = ReactBootstrap.DropdownButton;
 
 	var Row = React.createClass({displayName: "Row",
 	  getInitialState: function() {
@@ -235,21 +231,18 @@
 	      this.setState(nextProps)
 	  },
 	  render: function() {
-	    var self = this;
-	    if (this.props.override)
+	    if (this.props.override || this.state.override)
 	      var isChecked = this.props.checked
-	    if (this.state.override)
-	      var isChecked = this.state.checked
 	    var checked = isChecked
 	      ? React.createElement(Input, {type: "checkbox", onChange: this.handleCheck, checked: true, label: " "})
 	      : React.createElement(Input, {type: "checkbox", onChange: this.handleCheck, label: " "})
-	    var cells = self.props.columns.map(function(cell, i){
-	      var regex = new RegExp( '(' + self.props.filterText + ')', 'gi' );
-	      var html = self.props.row[cell];
-	      if (self.props.filterText.length >= 3)
+	    var cells = this.props.columns.map(function(cell, i){
+	      var regex = new RegExp( '(' + this.props.filterText + ')', 'gi' );
+	      var html = this.props.row[cell];
+	      if (this.props.filterText.length >= 3)
 	        html = html.toString().replace(regex, '<span class="highlighted">$1</span>');
 	      return React.createElement("td", {key: i, dangerouslySetInnerHTML: { "__html": html}});
-	    })
+	    }.bind(this))
 	    return (
 	        React.createElement("tr", {className: this.props.hidden ? 'hidden' : ''}, 
 	          React.createElement("td", {className: "rowID"}, 
@@ -276,7 +269,6 @@
 	  render: function() {
 	    var props = this.props;
 	    var state = this.state
-	    var self = this
 	    var negative = -1
 	    var positive = 1;
 	    if (state.reverse) {
@@ -289,11 +281,11 @@
 	          ? 'sort-selection-field'
 	          : '';
 	        return (
-	          React.createElement("th", {key: i, className: selected, onClick: self.handleClick.bind(self, column)}, 
+	          React.createElement("th", {key: i, className: selected, onClick: this.handleClick.bind(this, column)}, 
 	            column.charAt(0).toUpperCase() + column.slice(1)
 	          )
 	        )
-	      })
+	      }.bind(this))
 	    var rows = props.rows
 	      .filter(function(row){
 	        row.hidden = true;
@@ -341,7 +333,7 @@
 	    if (state.columns.length < 1) {
 	      return (
 	          React.createElement("div", {className: "row spacer"}, 
-	            React.createElement("div", {className: "waiting"}, " waiting for content ... ")
+	            React.createElement("div", {className: "loading"}, "Loading ...")
 	          )
 	      )
 	    }
@@ -385,20 +377,27 @@
 	});
 
 	var SearchBar = React.createClass({displayName: "SearchBar",
+	  getInitialState: function() {
+	    return {
+	      route: ''
+	    }
+	  },
 	  handleChange: function() {
-	      this.props.onUserInput(
-	          this.refs.filterTextInput.value
-	      );
+	    this.props.onUserInput(
+	        this.refs.filterTextInput.value
+	    );
 	  },
 	  render: function() {
+	    var routes = Object.keys(this.props.routes).map((route, i) => {
+	       return (React.createElement(MenuItem, {eventKey: i, key: i}, route))
+	    });
 	    return (
 	      React.createElement("div", {className: "row table-search"}, 
 	        React.createElement("form", {className: "form-grop", onSubmit: this.handleSubmit}, 
 	          React.createElement("div", {className: "data-table-search-panel"}, 
 	            React.createElement("input", {ref: "filterTextInput", type: "search", autoFocus: true, className: "data-table-search-input form-control input-lg", value: this.props.filterText, onChange: this.handleChange, placeholder: "Search...", "aria-describedby": "sizing-addon1"}), 
-	            React.createElement(DropdownButton, {title: "Routes", id: "bg-nested-dropdown", bsSize: "lg", className: "data-table-filter-dropdown"}, 
-	              React.createElement(MenuItem, {eventKey: "1"}, "Route 1"), 
-	              React.createElement(MenuItem, {eventKey: "2"}, "Route 2")
+	            React.createElement(DropdownButton, {title: this.props.selectedRoute || 'Routes', id: "bg-nested-dropdown", bsSize: "lg", className: "data-table-filter-dropdown", onSelect: this.props.handleSelect}, 
+	              routes
 	            )
 	          )
 	        )
@@ -412,26 +411,50 @@
 	    return {
 	      filterText: ''
 	    , sortField: ''
+	    , rows: this.props.rows
+	    , columns: this.props.columns
+	    , routes: this.props.routes
 	    };
 	  },
-
+	  getData: function(name, route) {
+	    this.setState({ rows: [{}], columns: [] }, () => {
+	      $.get(route, function(result) {
+	        if (this.isMounted()) {
+	          this.setState({ rows: result, columns: Object.keys(result[0]), selectedRoute: name });
+	        }
+	      }.bind(this));
+	    });
+	  },
 	  handleUserInput: function(filterText) {
 	    this.setState({ filterText: filterText });
 	  },
-
+	  handleSelect: function(e) {
+	    this.getData(e.target.text, this.props.routes[e.target.text])
+	  },
 	  render: function() {
 	    var columns = Object.keys(this.props.rows[0])
 	    return (
 	      React.createElement(Well, {className: "data-table-well"}, 
-	        React.createElement(SearchBar, {onUserInput: this.handleUserInput, filterText: this.state.filterText}), 
+	        React.createElement(SearchBar, {
+	          onUserInput: this.handleUserInput, 
+	          filterText: this.state.filterText, 
+	          routes: this.state.routes, 
+	          selectedRoute: this.state.selectedRoute || '', 
+	          handleSelect: this.handleSelect}), 
 	        React.createElement(Table, {
 	          ref: "dataTable", 
 	          filterText: this.state.filterText, 
-	          rows: this.props.rows, 
-	          columns: this.props.columns, 
+	          rows: this.state.rows, 
+	          columns: this.state.columns, 
 	          override: false})
 	      )
 	    );
+	  },
+	  componentWillMount: function() {
+	    for (var route in this.props.routes) break;
+	    this.setState({ selectedRoute: route }, function(){
+	      this.getData(route, this.props.routes[route])
+	    })
 	  }
 	});
 

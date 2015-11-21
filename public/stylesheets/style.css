@@ -44,7 +44,7 @@ body {
   cursor: pointer !important;
 }
 
-.waiting {
+.loading {
   position: relative;
   margin: 0 auto;
   width: 200px;

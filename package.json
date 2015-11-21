@@ -17,6 +17,7 @@
   "devDependencies": {
     "cors": "^2.7.1",
     "jsx-loader": "^0.13.2",
+    "merge": "^1.2.0",
     "mongoose": "^4.2.5",
     "react": "^0.14.2",
     "react-bootstrap": "^0.27.3",

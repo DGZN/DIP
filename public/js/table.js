@@ -1,14 +1,11 @@
-var React = require('react');
-var ReactDOM = require('react-dom');
-
-var BSTable = ReactBootstrap.Table;
-var Well = ReactBootstrap.Well;
-
-var Input = ReactBootstrap.Input;
-var Check = ReactBootstrap.Check;
-
-var DropdownButton = ReactBootstrap.DropdownButton;
-var MenuItem = ReactBootstrap.MenuItem;
+     var React = require('react'),
+      ReactDOM = require('react-dom'),
+          Well = ReactBootstrap.Well,
+         Input = ReactBootstrap.Input,
+         Check = ReactBootstrap.Check,
+       BSTable = ReactBootstrap.Table,
+      MenuItem = ReactBootstrap.MenuItem,
+DropdownButton = ReactBootstrap.DropdownButton;
 
 var Row = React.createClass({
   getInitialState: function() {
@@ -29,21 +26,18 @@ var Row = React.createClass({
       this.setState(nextProps)
   },
   render: function() {
-    var self = this;
-    if (this.props.override)
+    if (this.props.override || this.state.override)
       var isChecked = this.props.checked
-    if (this.state.override)
-      var isChecked = this.state.checked
     var checked = isChecked
       ? <Input type="checkbox" onChange={this.handleCheck} checked label=" " />
       : <Input type="checkbox" onChange={this.handleCheck} label=" " />
-    var cells = self.props.columns.map(function(cell, i){
-      var regex = new RegExp( '(' + self.props.filterText + ')', 'gi' );
-      var html = self.props.row[cell];
-      if (self.props.filterText.length >= 3)
+    var cells = this.props.columns.map(function(cell, i){
+      var regex = new RegExp( '(' + this.props.filterText + ')', 'gi' );
+      var html = this.props.row[cell];
+      if (this.props.filterText.length >= 3)
         html = html.toString().replace(regex, '<span class="highlighted">$1</span>');
       return <td key={i} dangerouslySetInnerHTML={{ "__html": html }}></td>;
-    })
+    }.bind(this))
     return (
         <tr className={this.props.hidden ? 'hidden' : ''}>
           <td className="rowID">
@@ -70,7 +64,6 @@ var Table = React.createClass({
   render: function() {
     var props = this.props;
     var state = this.state
-    var self = this
     var negative = -1
     var positive = 1;
     if (state.reverse) {
@@ -83,11 +76,11 @@ var Table = React.createClass({
           ? 'sort-selection-field'
           : '';
         return (
-          <th key={i} className={selected} onClick={self.handleClick.bind(self, column)}>
+          <th key={i} className={selected} onClick={this.handleClick.bind(this, column)}>
             {column.charAt(0).toUpperCase() + column.slice(1)}
           </th>
         )
-      })
+      }.bind(this))
     var rows = props.rows
       .filter(function(row){
         row.hidden = true;
@@ -135,7 +128,7 @@ var Table = React.createClass({
     if (state.columns.length < 1) {
       return (
           <div className="row spacer">
-            <div className="waiting"> waiting for content ... </div>
+            <div className="loading">Loading ...</div>
           </div>
       )
     }
@@ -179,20 +172,27 @@ var Table = React.createClass({
 });
 
 var SearchBar = React.createClass({
+  getInitialState: function() {
+    return {
+      route: ''
+    }
+  },
   handleChange: function() {
-      this.props.onUserInput(
-          this.refs.filterTextInput.value
-      );
+    this.props.onUserInput(
+        this.refs.filterTextInput.value
+    );
   },
   render: function() {
+    var routes = Object.keys(this.props.routes).map((route, i) => {
+       return (<MenuItem eventKey={i} key={i}>{route}</MenuItem>)
+    });
     return (
       <div className="row table-search">
         <form className="form-grop" onSubmit={this.handleSubmit}>
           <div className="data-table-search-panel">
             <input ref="filterTextInput" type="search" autoFocus className="data-table-search-input form-control input-lg" value={this.props.filterText} onChange={this.handleChange} placeholder="Search..." aria-describedby="sizing-addon1"></input>
-            <DropdownButton title="Routes" id="bg-nested-dropdown" bsSize="lg" className="data-table-filter-dropdown">
-              <MenuItem eventKey="1">Route 1</MenuItem>
-              <MenuItem eventKey="2">Route 2</MenuItem>
+            <DropdownButton title={this.props.selectedRoute || 'Routes'} id="bg-nested-dropdown" bsSize="lg" className="data-table-filter-dropdown" onSelect={this.props.handleSelect}>
+              {routes}
             </DropdownButton>
           </div>
         </form>
@@ -206,26 +206,50 @@ var DataTable = React.createClass({
     return {
       filterText: ''
     , sortField: ''
+    , rows: this.props.rows
+    , columns: this.props.columns
+    , routes: this.props.routes
     };
   },
-
+  getData: function(name, route) {
+    this.setState({ rows: [{}], columns: [] }, () => {
+      $.get(route, function(result) {
+        if (this.isMounted()) {
+          this.setState({ rows: result, columns: Object.keys(result[0]), selectedRoute: name });
+        }
+      }.bind(this));
+    });
+  },
   handleUserInput: function(filterText) {
     this.setState({ filterText: filterText });
   },
-
+  handleSelect: function(e) {
+    this.getData(e.target.text, this.props.routes[e.target.text])
+  },
   render: function() {
     var columns = Object.keys(this.props.rows[0])
     return (
       <Well className="data-table-well">
-        <SearchBar onUserInput={this.handleUserInput} filterText={this.state.filterText} />
+        <SearchBar
+          onUserInput={this.handleUserInput}
+          filterText={this.state.filterText}
+          routes={this.state.routes}
+          selectedRoute={this.state.selectedRoute || ''}
+          handleSelect={this.handleSelect} />
         <Table
           ref="dataTable"
           filterText={this.state.filterText}
-          rows={this.props.rows}
-          columns={this.props.columns}
+          rows={this.state.rows}
+          columns={this.state.columns}
           override={false} />
       </Well>
     );
+  },
+  componentWillMount: function() {
+    for (var route in this.props.routes) break;
+    this.setState({ selectedRoute: route }, function(){
+      this.getData(route, this.props.routes[route])
+    })
   }
 });
 
