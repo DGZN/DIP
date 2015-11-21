@@ -11,6 +11,26 @@ body {
   display: block;
 }
 
+.table>tbody>tr>td {
+    text-align: center;
+    max-width: 150px;
+    overflow: auto;
+    padding: 6px;
+    word-wrap: break-word;
+}
+
+.column-resize {
+  width: 1px;
+  background-color: none;
+  border: 1px solid !important;
+  padding: 1px !important;
+  cursor: col-resize;
+}
+
+.column-resize:hover {
+  background-color: rgba(66,66,66,.4);
+}
+
 .data-table-search-input {
   float: left;
 }

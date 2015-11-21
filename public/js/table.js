@@ -31,19 +31,22 @@ var Row = React.createClass({
     var checked = isChecked
       ? <Input type="checkbox" onChange={this.handleCheck} checked label=" " />
       : <Input type="checkbox" onChange={this.handleCheck} label=" " />
+
+    var _cells = [];
     var cells = this.props.columns.map(function(cell, i){
       var regex = new RegExp( '(' + this.props.filterText + ')', 'gi' );
       var html = this.props.row[cell];
       if (this.props.filterText.length >= 3)
         html = html.toString().replace(regex, '<span class="highlighted">$1</span>');
-      return <td key={i} dangerouslySetInnerHTML={{ "__html": html }}></td>;
+      _cells.push(<td key={i} dangerouslySetInnerHTML={{ "__html": html }}></td>
+      ,<td key={i+'-resize'} className="column-resize"></td>)
     }.bind(this))
     return (
         <tr className={this.props.hidden ? 'hidden' : ''}>
           <td className="rowID">
             {checked}
           </td>
-          {cells}
+          {_cells}
         </tr>
     );
   }
@@ -70,15 +73,17 @@ var Table = React.createClass({
       var negative = 1;
       var positive = -1;
     }
+    var _columns = []
     var columns = state.columns
       .map(function(column, i){
         var selected = state.sortField == column
           ? 'sort-selection-field'
           : '';
-        return (
-          <th key={i} className={selected} onClick={this.handleClick.bind(this, column)}>
+        var className = i+'-resize'
+        _columns.push(
+          <th key={i} className={selected, className} onClick={this.handleClick.bind(this, column)}>
             {column.charAt(0).toUpperCase() + column.slice(1)}
-          </th>
+          </th>,<td key={i+'-resize'} className="column-resize" onClick={this.resizeCol.bind(this, i+'-resize')}></td>
         )
       }.bind(this))
     var rows = props.rows
@@ -135,13 +140,13 @@ var Table = React.createClass({
     return (
         <div className="row spacer">
           <div>
-            <BSTable className="dataTable" striped bordered hover >
+            <BSTable className="dataTable" striped bordered hover responsive={true}>
                 <thead className="data-table-thead">
                   <tr>
                     <th>
                       <Input type="checkbox" standalone onChange={this.handleCheck} label=" " />
                     </th>
-                    {columns}
+                    {_columns}
                   </tr>
                 </thead>
                 <tbody>
@@ -168,6 +173,16 @@ var Table = React.createClass({
       row[column] = row[column].toString().replace(keyword, '<span class="highlighted">' + keyword + '</span>')
     })
     return row;
+  },
+  resizeCol: function(selector){
+    var resize = setInterval(function(){
+      var col = document.getElementsByClassName(selector)[0]
+      var _currentWidth = parseInt(col.scrollWidth)
+      console.log("currentWidth", _currentWidth);
+      if (_currentWidth <= 50)
+        clearInterval(this)
+      col.style['width'] = _currentWidth - 1 + 'px'
+    }, 1)
   }
 });
 
@@ -250,6 +265,9 @@ var DataTable = React.createClass({
     this.setState({ selectedRoute: route }, function(){
       this.getData(route, this.props.routes[route])
     })
+  },
+  componentDidMount: function() {
+
   }
 });
 

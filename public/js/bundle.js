@@ -236,19 +236,22 @@
 	    var checked = isChecked
 	      ? React.createElement(Input, {type: "checkbox", onChange: this.handleCheck, checked: true, label: " "})
 	      : React.createElement(Input, {type: "checkbox", onChange: this.handleCheck, label: " "})
+
+	    var _cells = [];
 	    var cells = this.props.columns.map(function(cell, i){
 	      var regex = new RegExp( '(' + this.props.filterText + ')', 'gi' );
 	      var html = this.props.row[cell];
 	      if (this.props.filterText.length >= 3)
 	        html = html.toString().replace(regex, '<span class="highlighted">$1</span>');
-	      return React.createElement("td", {key: i, dangerouslySetInnerHTML: { "__html": html}});
+	      _cells.push(React.createElement("td", {key: i, dangerouslySetInnerHTML: { "__html": html}})
+	      ,React.createElement("td", {key: i+'-resize', className: "column-resize"}))
 	    }.bind(this))
 	    return (
 	        React.createElement("tr", {className: this.props.hidden ? 'hidden' : ''}, 
 	          React.createElement("td", {className: "rowID"}, 
 	            checked
 	          ), 
-	          cells
+	          _cells
 	        )
 	    );
 	  }
@@ -275,15 +278,17 @@
 	      var negative = 1;
 	      var positive = -1;
 	    }
+	    var _columns = []
 	    var columns = state.columns
 	      .map(function(column, i){
 	        var selected = state.sortField == column
 	          ? 'sort-selection-field'
 	          : '';
-	        return (
-	          React.createElement("th", {key: i, className: selected, onClick: this.handleClick.bind(this, column)}, 
+	        var className = i+'-resize'
+	        _columns.push(
+	          React.createElement("th", {key: i, className: selected, className, onClick: this.handleClick.bind(this, column)}, 
 	            column.charAt(0).toUpperCase() + column.slice(1)
-	          )
+	          ),React.createElement("td", {key: i+'-resize', className: "column-resize", onClick: this.resizeCol.bind(this, i+'-resize')})
 	        )
 	      }.bind(this))
 	    var rows = props.rows
@@ -340,13 +345,13 @@
 	    return (
 	        React.createElement("div", {className: "row spacer"}, 
 	          React.createElement("div", null, 
-	            React.createElement(BSTable, {className: "dataTable", striped: true, bordered: true, hover: true}, 
+	            React.createElement(BSTable, {className: "dataTable", striped: true, bordered: true, hover: true, responsive: true}, 
 	                React.createElement("thead", {className: "data-table-thead"}, 
 	                  React.createElement("tr", null, 
 	                    React.createElement("th", null, 
 	                      React.createElement(Input, {type: "checkbox", standalone: true, onChange: this.handleCheck, label: " "})
 	                    ), 
-	                    columns
+	                    _columns
 	                  )
 	                ), 
 	                React.createElement("tbody", null, 
@@ -373,6 +378,16 @@
 	      row[column] = row[column].toString().replace(keyword, '<span class="highlighted">' + keyword + '</span>')
 	    })
 	    return row;
+	  },
+	  resizeCol: function(selector){
+	    var resize = setInterval(function(){
+	      var col = document.getElementsByClassName(selector)[0]
+	      var _currentWidth = parseInt(col.scrollWidth)
+	      console.log("currentWidth", _currentWidth);
+	      if (_currentWidth <= 50)
+	        clearInterval(this)
+	      col.style['width'] = _currentWidth - 1 + 'px'
+	    }, 1)
 	  }
 	});
 
@@ -455,6 +470,9 @@
 	    this.setState({ selectedRoute: route }, function(){
 	      this.getData(route, this.props.routes[route])
 	    })
+	  },
+	  componentDidMount: function() {
+
 	  }
 	});
 
