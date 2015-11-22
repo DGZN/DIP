@@ -365,7 +365,7 @@
 	          columns: this.state.columns, 
 	          guides: this.props.guides, 
 	          override: this.state.override}))
-	        if (this.props.guides)
+	        if (this.props.guides && !row.hidden)
 	          _rows.push(React.createElement(ResizeRow, {columns: this.state.columns}))
 	      }.bind(this));
 	    if (state.columns.length < 1)
@@ -424,8 +424,6 @@
 	        alignment: merge(this.state.alignment, {
 	          [sortField]: _alignment
 	        })
-	      }, () => {
-	        console.log("Alignment", this.state.alignment);
 	      })
 	      return;
 	    }
