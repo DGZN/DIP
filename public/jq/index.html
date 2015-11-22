@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Resizable Columns</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+  </head>
+  <style>
+  body {
+    background-color: rgba(0,0,0,.3);
+  }
+  table {
+    position: relative;
+    margin: 0 auto;
+    max-width: 600px;
+    border: 2px solid black;
+    color: white;
+    font-weight: 100;
+    font-size: 14px;
+  }
+  table thead tr {
+    height: 50px;
+    background-color: grey;
+  }
+  table tr {
+    background-color: rgba(0,0,0,1);
+  }
+
+  .column-resize {
+    width: 2px;
+    border: 1px solid black;
+  }
+
+  .column-resize:hover {
+    cursor: col-resize;
+    background-color: white;
+  }
+
+  </style>
+  <body>
+    <table>
+      <thead>
+        <tr>
+          <th>Branch</th>
+          <th>Description</th>
+          <th class="column-resize"></th>
+          <th>GUID</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>LIVE ACTION SHORT FILM	</td>
+          <td>Tells the forgotten story of the immigrants who built America while pointing to those who now seek the same opportunities and safety around the world.</td>
+          <td></td>
+          <td>CB82CAAD-CB38-4F32-AD38-90E66CB4768E	</td>
+        </tr>
+        <tr>
+          <td>LIVE ACTION SHORT FILM	</td>
+          <td>Tells the forgotten story of the immigrants who built America while pointing to those who now seek the same opportunities and safety around the world.</td>
+          <td></td>
+          <td>CB82CAAD-CB38-4F32-AD38-90E66CB4768E	</td>
+        </tr>
+        <tr>
+          <td>LIVE ACTION SHORT FILM	</td>
+          <td>Tells the forgotten story of the immigrants who built America while pointing to those who now seek the same opportunities and safety around the world.</td>
+          <td></td>
+          <td>CB82CAAD-CB38-4F32-AD38-90E66CB4768E	</td>
+        </tr>
+        <tr>
+          <td>LIVE ACTION SHORT FILM	</td>
+          <td>Tells the forgotten story of the immigrants who built America while pointing to those who now seek the same opportunities and safety around the world.</td>
+          <td></td>
+          <td>CB82CAAD-CB38-4F32-AD38-90E66CB4768E	</td>
+        </tr>
+        <tr>
+          <td>LIVE ACTION SHORT FILM	</td>
+          <td>Tells the forgotten story of the immigrants who built America while pointing to those who now seek the same opportunities and safety around the world.</td>
+          <td></td>
+          <td>CB82CAAD-CB38-4F32-AD38-90E66CB4768E	</td>
+        </tr>
+        <tr>
+          <td>LIVE ACTION SHORT FILM	</td>
+          <td>Tells the forgotten story of the immigrants who built America while pointing to those who now seek the same opportunities and safety around the world.</td>
+          <td></td>
+          <td>CB82CAAD-CB38-4F32-AD38-90E66CB4768E	</td>
+        </tr>
+        <tr>
+          <td>LIVE ACTION SHORT FILM	</td>
+          <td>Tells the forgotten story of the immigrants who built America while pointing to those who now seek the same opportunities and safety around the world.</td>
+          <td></td>
+          <td>CB82CAAD-CB38-4F32-AD38-90E66CB4768E	</td>
+        </tr>
+        <tr>
+          <td>LIVE ACTION SHORT FILM	</td>
+          <td>Tells the forgotten story of the immigrants who built America while pointing to those who now seek the same opportunities and safety around the world.</td>
+          <td></td>
+          <td>CB82CAAD-CB38-4F32-AD38-90E66CB4768E	</td>
+        </tr>
+        <tr>
+          <td>LIVE ACTION SHORT FILM	</td>
+          <td>Tells the forgotten story of the immigrants who built America while pointing to those who now seek the same opportunities and safety around the world.</td>
+          <td></td>
+          <td>CB82CAAD-CB38-4F32-AD38-90E66CB4768E	</td>
+        </tr>
+        <tr>
+          <td>LIVE ACTION SHORT FILM	</td>
+          <td>Tells the forgotten story of the immigrants who built America while pointing to those who now seek the same opportunities and safety around the world.</td>
+          <td></td>
+          <td>CB82CAAD-CB38-4F32-AD38-90E66CB4768E	</td>
+        </tr>
+        <tr>
+          <td>LIVE ACTION SHORT FILM	</td>
+          <td>Tells the forgotten story of the immigrants who built America while pointing to those who now seek the same opportunities and safety around the world.</td>
+          <td></td>
+          <td>CB82CAAD-CB38-4F32-AD38-90E66CB4768E	</td>
+        </tr>
+        <tr>
+          <td>LIVE ACTION SHORT FILM	</td>
+          <td>Tells the forgotten story of the immigrants who built America while pointing to those who now seek the same opportunities and safety around the world.</td>
+          <td></td>
+          <td>CB82CAAD-CB38-4F32-AD38-90E66CB4768E	</td>
+        </tr>
+      </tbody>
+    </table>
+  </body>
+  <script type="text/javascript">
+  var resizing = false, _column, _x;
+  $(() => {
+    $(document).mousemove((e)=>{
+      if (!resizing) return;
+      _x = _x || e.pageX
+      $('.column-resize').prev().width(e.pageX < _x
+        ? ($('.column-resize').prev().width() - 5)
+        : ($('.column-resize').prev().width() + 5))
+      _x = e.pageX
+    })
+    $('.column-resize').click(()=>{
+      resizing = !resizing
+      console.log("resizing", resizing)
+    })
+    $('thead').click(()=>{
+      resizing = !resizing
+      if (resizing)
+        $('table thead tr ').css('cursor', 'col-resize')
+    })
+  })
+  </script>
+</html>

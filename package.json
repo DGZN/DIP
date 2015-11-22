@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "webpack && nodemon -e jade ./bin/www"
+    "start": "webpack && node ./bin/www"
   },
   "dependencies": {
     "body-parser": "~1.13.2",

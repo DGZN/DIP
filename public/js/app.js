@@ -6,7 +6,7 @@ var SlideMenu = require('./menu.js');
 var DataTable = require('./table.js');
 
 var routes = {
-  'Oscars': 'http://api.opendev.oscars.org/v1/assets/films'
+  'Oscars': 'http://api.opendev.oscars.org/v1/assets/films?!fields=last_watched,poster,guid,slug,resume'
 , 'Melody': 'http://localhost:8000/v1/assets/movies'
 , 'Seasons':  'http://localhost:8000/v1/assets/series/seasons/episodes'
 };

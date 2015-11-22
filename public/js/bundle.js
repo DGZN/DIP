@@ -52,7 +52,7 @@
 	var DataTable = __webpack_require__(5);
 
 	var routes = {
-	  'Oscars': 'http://api.opendev.oscars.org/v1/assets/films'
+	  'Oscars': 'http://api.opendev.oscars.org/v1/assets/films?!fields=last_watched,poster,guid,slug,resume'
 	, 'Melody': 'http://localhost:8000/v1/assets/movies'
 	, 'Seasons':  'http://localhost:8000/v1/assets/series/seasons/episodes'
 	};
@@ -205,11 +205,13 @@
 
 	     var React = __webpack_require__(1),
 	      ReactDOM = __webpack_require__(2),
+	         merge = __webpack_require__(6),
 	          Well = ReactBootstrap.Well,
 	         Input = ReactBootstrap.Input,
 	         Check = ReactBootstrap.Check,
 	       BSTable = ReactBootstrap.Table,
 	      MenuItem = ReactBootstrap.MenuItem,
+	     Glyphicon = ReactBootstrap.Glyphicon,
 	DropdownButton = ReactBootstrap.DropdownButton;
 
 	var Row = React.createClass({displayName: "Row",
@@ -236,15 +238,19 @@
 	    var checked = isChecked
 	      ? React.createElement(Input, {type: "checkbox", onChange: this.handleCheck, checked: true, label: " "})
 	      : React.createElement(Input, {type: "checkbox", onChange: this.handleCheck, label: " "})
-
 	    var _cells = [];
 	    var cells = this.props.columns.map(function(cell, i){
 	      var regex = new RegExp( '(' + this.props.filterText + ')', 'gi' );
 	      var html = this.props.row[cell];
+	      if (this.props.alignment.hasOwnProperty(cell)) {
+	        var alignment = this.props.alignment[cell]
+	        var _alignment = 'align' + alignment.charAt(0).toUpperCase() + alignment.slice(1);
+	      }
 	      if (this.props.filterText.length >= 3)
 	        html = html.toString().replace(regex, '<span class="highlighted">$1</span>');
-	      _cells.push(React.createElement("td", {key: i, dangerouslySetInnerHTML: { "__html": html}})
-	      ,React.createElement("td", {key: i+'-resize', className: "column-resize"}))
+	      _cells.push(React.createElement("td", {key: i, className: _alignment, dangerouslySetInnerHTML: { "__html": html}}))
+	      if (this.props.guides)
+	        _cells.push(React.createElement("td", {key: i+'-resize', className: "column-resize resizeCursor"}))
 	    }.bind(this))
 	    return (
 	        React.createElement("tr", {className: this.props.hidden ? 'hidden' : ''}, 
@@ -257,6 +263,24 @@
 	  }
 	})
 
+	var ResizeRow = React.createClass({displayName: "ResizeRow",
+	  render: function() {
+	    var columns = this.props.columns.map(function(column, i) {
+	      return (
+	        React.createElement("td", {key: i + '.resize', className: "column-resize"})
+	      )
+	    })
+	    columns.push(React.createElement("td", {key: (columns.length + 1) + '.resize', className: "column-resize"}))
+	    return (
+	        React.createElement("tr", {className: this.props.hidden ? 'hidden' : 'row-resize'}, 
+	          columns
+	        )
+	    );
+	  }
+	})
+
+	var _x, _lx, _w, resizing, isResizing;
+
 	var Table = React.createClass({displayName: "Table",
 	  getInitialState: function() {
 	    return {
@@ -264,6 +288,8 @@
 	    , checked: false
 	    , override: this.props.override || false
 	    , columns: this.props.columns
+	    , alignment: {}
+	    , isResizing: false
 	    };
 	  },
 	  componentWillReceiveProps: function(props) {
@@ -279,6 +305,7 @@
 	      var positive = -1;
 	    }
 	    var _columns = []
+	    var _rows = []
 	    var columns = state.columns
 	      .map(function(column, i){
 	        var selected = state.sortField == column
@@ -286,10 +313,14 @@
 	          : '';
 	        var className = i+'-resize'
 	        _columns.push(
-	          React.createElement("th", {key: i, className: selected, className, onClick: this.handleClick.bind(this, column)}, 
-	            column.charAt(0).toUpperCase() + column.slice(1)
-	          ),React.createElement("td", {key: i+'-resize', className: "column-resize", onClick: this.resizeCol.bind(this, i+'-resize')})
+	          React.createElement("th", {key: i, ref: "thead", className: selected, className, onClick: this.handleClick.bind(this, column)}, 
+	            React.createElement("span", {className: "columnName"}, 
+	              column.charAt(0).toUpperCase() + column.slice(1)
+	            )
+	          )
 	        )
+	        if (props.guides)
+	          _columns.push(React.createElement("th", {key: i+'.resize', className: "column-resize", onClick: this.resizeCol.bind(this, i+'-resize')}))
 	      }.bind(this))
 	    var rows = props.rows
 	      .filter(function(row){
@@ -322,31 +353,32 @@
 	      })
 	      .map(function(row, i){
 	        i++;
-	        return (
-	          React.createElement(Row, {
-	            key: i, 
-	            rowID: i, 
-	            row: row, 
-	            checked: state.checked, 
-	            sortField: state.sortField, 
-	            hidden: row.hidden ? true : false, 
-	            filterText: state.filterText, 
-	            columns: state.columns, 
-	            override: state.override})
-	        )
-	      });
-	    if (state.columns.length < 1) {
+	        _rows.push(React.createElement(Row, {
+	          key: i, 
+	          rowID: i, 
+	          row: row, 
+	          checked: this.state.checked, 
+	          sortField: this.state.sortField, 
+	          hidden: row.hidden ? true : false, 
+	          filterText: this.state.filterText, 
+	          alignment: this.state.alignment, 
+	          columns: this.state.columns, 
+	          guides: this.props.guides, 
+	          override: this.state.override}))
+	        if (this.props.guides)
+	          _rows.push(React.createElement(ResizeRow, {columns: this.state.columns}))
+	      }.bind(this));
+	    if (state.columns.length < 1)
 	      return (
 	          React.createElement("div", {className: "row spacer"}, 
 	            React.createElement("div", {className: "loading"}, "Loading ...")
 	          )
 	      )
-	    }
 	    return (
 	        React.createElement("div", {className: "row spacer"}, 
 	          React.createElement("div", null, 
 	            React.createElement(BSTable, {className: "dataTable", striped: true, bordered: true, hover: true, responsive: true}, 
-	                React.createElement("thead", {className: "data-table-thead"}, 
+	                React.createElement("thead", {ref: "dataTable-head", className: "data-table-thead", onMouseMove: this.mouseMove}, 
 	                  React.createElement("tr", null, 
 	                    React.createElement("th", null, 
 	                      React.createElement(Input, {type: "checkbox", standalone: true, onChange: this.handleCheck, label: " "})
@@ -355,14 +387,48 @@
 	                  )
 	                ), 
 	                React.createElement("tbody", null, 
-	                  rows
+	                  _rows
 	                )
 	            )
 	          )
 	        )
 	    );
 	  },
-	  handleClick: function(sortField) {
+	  handleClick: function(sortField, e) {
+	    if (isResizing) {
+	      this.refs['dataTable-head'].style['cursor'] = 'pointer';
+	      isResizing = !isResizing, _x = null, _lx = null
+	      return;
+	    }
+	    if (this.props.guides) {
+
+	      var _alignment = e.target.parentElement.style['text-align'];
+
+	      switch (_alignment) {
+	        case 'left':
+	           _alignment = 'center'
+	          break;
+	        case 'center':
+	           _alignment = 'right'
+	          break;
+	        case 'right':
+	           _alignment = 'left'
+	          break;
+	        default:
+	        _alignment = 'center'
+	      }
+
+	      e.target.parentElement.style['text-align'] = _alignment
+
+	      this.setState({
+	        alignment: merge(this.state.alignment, {
+	          [sortField]: _alignment
+	        })
+	      }, () => {
+	        console.log("Alignment", this.state.alignment);
+	      })
+	      return;
+	    }
 	    if (this.state.sortField == sortField && !this.state.reverse) {
 	      return this.setState({ sortField: sortField, override: false, reverse: true })
 	    } else {
@@ -379,15 +445,28 @@
 	    })
 	    return row;
 	  },
-	  resizeCol: function(selector){
-	    var resize = setInterval(function(){
-	      var col = document.getElementsByClassName(selector)[0]
-	      var _currentWidth = parseInt(col.scrollWidth)
-	      console.log("currentWidth", _currentWidth);
-	      if (_currentWidth <= 50)
-	        clearInterval(this)
-	      col.style['width'] = _currentWidth - 1 + 'px'
-	    }, 1)
+	  resizeCol: function(selector) {
+	    var col = document.getElementsByClassName(selector)[0]
+	    resizing = col, isResizing = !isResizing, _x = null, _lx = null
+	    this.refs['dataTable-head'].style['cursor'] = isResizing
+	        ? 'col-resize'
+	        : 'pointer';
+	  },
+	  mouseMove: function(e) {
+	    if (!isResizing)
+	      return false;
+	    var col = resizing
+	    var _currentWidth = col.scrollWidth
+	    _x = _x || e.pageX
+	    _lx = _lx || e.pageX
+	    _w = _w || col.scrollWidth
+	    if (e.pageX < _x) {
+	      var width = _currentWidth - (_lx - e.pageX)
+	    } else {
+	      var width = _currentWidth + (e.pageX - _lx)
+	    }
+	    _lx = e.pageX
+	    col.style['width'] = width + 'px'
 	  }
 	});
 
@@ -414,7 +493,8 @@
 	            React.createElement(DropdownButton, {title: this.props.selectedRoute || 'Routes', id: "bg-nested-dropdown", bsSize: "lg", className: "data-table-filter-dropdown", onSelect: this.props.handleSelect}, 
 	              routes
 	            )
-	          )
+	          ), 
+	          React.createElement(Glyphicon, {glyph: "cog", className: "data-table-settings", onClick: this.props.toggleSettings})
 	        )
 	      )
 	    );
@@ -426,6 +506,7 @@
 	    return {
 	      filterText: ''
 	    , sortField: ''
+	    , showSettings : true
 	    , rows: this.props.rows
 	    , columns: this.props.columns
 	    , routes: this.props.routes
@@ -446,6 +527,11 @@
 	  handleSelect: function(e) {
 	    this.getData(e.target.text, this.props.routes[e.target.text])
 	  },
+	  toggleSettings: function() {
+	    this.setState({
+	      showSettings: !this.state.showSettings
+	    })
+	  },
 	  render: function() {
 	    var columns = Object.keys(this.props.rows[0])
 	    return (
@@ -455,12 +541,14 @@
 	          filterText: this.state.filterText, 
 	          routes: this.state.routes, 
 	          selectedRoute: this.state.selectedRoute || '', 
+	          toggleSettings: this.toggleSettings, 
 	          handleSelect: this.handleSelect}), 
 	        React.createElement(Table, {
 	          ref: "dataTable", 
 	          filterText: this.state.filterText, 
 	          rows: this.state.rows, 
 	          columns: this.state.columns, 
+	          guides: this.state.showSettings, 
 	          override: false})
 	      )
 	    );
@@ -477,6 +565,203 @@
 	});
 
 	module.exports = DataTable;
+
+
+/***/ },
+/* 6 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(module) {/*!
+	 * @name JavaScript/NodeJS Merge v1.2.0
+	 * @author yeikos
+	 * @repository https://github.com/yeikos/js.merge
+
+	 * Copyright 2014 yeikos - MIT license
+	 * https://raw.github.com/yeikos/js.merge/master/LICENSE
+	 */
+
+	;(function(isNode) {
+
+		/**
+		 * Merge one or more objects 
+		 * @param bool? clone
+		 * @param mixed,... arguments
+		 * @return object
+		 */
+
+		var Public = function(clone) {
+
+			return merge(clone === true, false, arguments);
+
+		}, publicName = 'merge';
+
+		/**
+		 * Merge two or more objects recursively 
+		 * @param bool? clone
+		 * @param mixed,... arguments
+		 * @return object
+		 */
+
+		Public.recursive = function(clone) {
+
+			return merge(clone === true, true, arguments);
+
+		};
+
+		/**
+		 * Clone the input removing any reference
+		 * @param mixed input
+		 * @return mixed
+		 */
+
+		Public.clone = function(input) {
+
+			var output = input,
+				type = typeOf(input),
+				index, size;
+
+			if (type === 'array') {
+
+				output = [];
+				size = input.length;
+
+				for (index=0;index<size;++index)
+
+					output[index] = Public.clone(input[index]);
+
+			} else if (type === 'object') {
+
+				output = {};
+
+				for (index in input)
+
+					output[index] = Public.clone(input[index]);
+
+			}
+
+			return output;
+
+		};
+
+		/**
+		 * Merge two objects recursively
+		 * @param mixed input
+		 * @param mixed extend
+		 * @return mixed
+		 */
+
+		function merge_recursive(base, extend) {
+
+			if (typeOf(base) !== 'object')
+
+				return extend;
+
+			for (var key in extend) {
+
+				if (typeOf(base[key]) === 'object' && typeOf(extend[key]) === 'object') {
+
+					base[key] = merge_recursive(base[key], extend[key]);
+
+				} else {
+
+					base[key] = extend[key];
+
+				}
+
+			}
+
+			return base;
+
+		}
+
+		/**
+		 * Merge two or more objects
+		 * @param bool clone
+		 * @param bool recursive
+		 * @param array argv
+		 * @return object
+		 */
+
+		function merge(clone, recursive, argv) {
+
+			var result = argv[0],
+				size = argv.length;
+
+			if (clone || typeOf(result) !== 'object')
+
+				result = {};
+
+			for (var index=0;index<size;++index) {
+
+				var item = argv[index],
+
+					type = typeOf(item);
+
+				if (type !== 'object') continue;
+
+				for (var key in item) {
+
+					var sitem = clone ? Public.clone(item[key]) : item[key];
+
+					if (recursive) {
+
+						result[key] = merge_recursive(result[key], sitem);
+
+					} else {
+
+						result[key] = sitem;
+
+					}
+
+				}
+
+			}
+
+			return result;
+
+		}
+
+		/**
+		 * Get type of variable
+		 * @param mixed input
+		 * @return string
+		 *
+		 * @see http://jsperf.com/typeofvar
+		 */
+
+		function typeOf(input) {
+
+			return ({}).toString.call(input).slice(8, -1).toLowerCase();
+
+		}
+
+		if (isNode) {
+
+			module.exports = Public;
+
+		} else {
+
+			window[publicName] = Public;
+
+		}
+
+	})(typeof module === 'object' && module && typeof module.exports === 'object' && module.exports);
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(7)(module)))
+
+/***/ },
+/* 7 */
+/***/ function(module, exports) {
+
+	module.exports = function(module) {
+		if(!module.webpackPolyfill) {
+			module.deprecate = function() {};
+			module.paths = [];
+			// module.parent = undefined by default
+			module.children = [];
+			module.webpackPolyfill = 1;
+		}
+		return module;
+	}
 
 
 /***/ }

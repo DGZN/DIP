@@ -1,10 +1,12 @@
      var React = require('react'),
       ReactDOM = require('react-dom'),
+         merge = require('merge'),
           Well = ReactBootstrap.Well,
          Input = ReactBootstrap.Input,
          Check = ReactBootstrap.Check,
        BSTable = ReactBootstrap.Table,
       MenuItem = ReactBootstrap.MenuItem,
+     Glyphicon = ReactBootstrap.Glyphicon,
 DropdownButton = ReactBootstrap.DropdownButton;
 
 var Row = React.createClass({
@@ -31,15 +33,19 @@ var Row = React.createClass({
     var checked = isChecked
       ? <Input type="checkbox" onChange={this.handleCheck} checked label=" " />
       : <Input type="checkbox" onChange={this.handleCheck} label=" " />
-
     var _cells = [];
     var cells = this.props.columns.map(function(cell, i){
       var regex = new RegExp( '(' + this.props.filterText + ')', 'gi' );
       var html = this.props.row[cell];
+      if (this.props.alignment.hasOwnProperty(cell)) {
+        var alignment = this.props.alignment[cell]
+        var _alignment = 'align' + alignment.charAt(0).toUpperCase() + alignment.slice(1);
+      }
       if (this.props.filterText.length >= 3)
         html = html.toString().replace(regex, '<span class="highlighted">$1</span>');
-      _cells.push(<td key={i} dangerouslySetInnerHTML={{ "__html": html }}></td>
-      ,<td key={i+'-resize'} className="column-resize"></td>)
+      _cells.push(<td key={i} className={_alignment} dangerouslySetInnerHTML={{ "__html": html }}></td>)
+      if (this.props.guides)
+        _cells.push(<td key={i+'-resize'} className="column-resize resizeCursor"></td>)
     }.bind(this))
     return (
         <tr className={this.props.hidden ? 'hidden' : ''}>
@@ -52,6 +58,24 @@ var Row = React.createClass({
   }
 })
 
+var ResizeRow = React.createClass({
+  render: function() {
+    var columns = this.props.columns.map(function(column, i) {
+      return (
+        <td key={i + '.resize'} className="column-resize"></td>
+      )
+    })
+    columns.push(<td key={(columns.length + 1) + '.resize'} className="column-resize"></td>)
+    return (
+        <tr className={this.props.hidden ? 'hidden' : 'row-resize'}>
+          {columns}
+        </tr>
+    );
+  }
+})
+
+var _x, _lx, _w, resizing, isResizing;
+
 var Table = React.createClass({
   getInitialState: function() {
     return {
@@ -59,6 +83,8 @@ var Table = React.createClass({
     , checked: false
     , override: this.props.override || false
     , columns: this.props.columns
+    , alignment: {}
+    , isResizing: false
     };
   },
   componentWillReceiveProps: function(props) {
@@ -74,6 +100,7 @@ var Table = React.createClass({
       var positive = -1;
     }
     var _columns = []
+    var _rows = []
     var columns = state.columns
       .map(function(column, i){
         var selected = state.sortField == column
@@ -81,10 +108,14 @@ var Table = React.createClass({
           : '';
         var className = i+'-resize'
         _columns.push(
-          <th key={i} className={selected, className} onClick={this.handleClick.bind(this, column)}>
-            {column.charAt(0).toUpperCase() + column.slice(1)}
-          </th>,<td key={i+'-resize'} className="column-resize" onClick={this.resizeCol.bind(this, i+'-resize')}></td>
+          <th key={i} ref="thead" className={selected, className} onClick={this.handleClick.bind(this, column)}>
+            <span className="columnName">
+              {column.charAt(0).toUpperCase() + column.slice(1)}
+            </span>
+          </th>
         )
+        if (props.guides)
+          _columns.push(<th key={i+'.resize'} className="column-resize" onClick={this.resizeCol.bind(this, i+'-resize')}></th>)
       }.bind(this))
     var rows = props.rows
       .filter(function(row){
@@ -117,31 +148,32 @@ var Table = React.createClass({
       })
       .map(function(row, i){
         i++;
-        return (
-          <Row
-            key={i}
-            rowID={i}
-            row={row}
-            checked={state.checked}
-            sortField={state.sortField}
-            hidden={row.hidden ? true : false}
-            filterText={state.filterText}
-            columns={state.columns}
-            override={state.override}  />
-        )
-      });
-    if (state.columns.length < 1) {
+        _rows.push(<Row
+          key={i}
+          rowID={i}
+          row={row}
+          checked={this.state.checked}
+          sortField={this.state.sortField}
+          hidden={row.hidden ? true : false}
+          filterText={this.state.filterText}
+          alignment={this.state.alignment}
+          columns={this.state.columns}
+          guides={this.props.guides}
+          override={this.state.override}  />)
+        if (this.props.guides)
+          _rows.push(<ResizeRow columns={this.state.columns} />)
+      }.bind(this));
+    if (state.columns.length < 1)
       return (
           <div className="row spacer">
             <div className="loading">Loading ...</div>
           </div>
       )
-    }
     return (
         <div className="row spacer">
           <div>
             <BSTable className="dataTable" striped bordered hover responsive={true}>
-                <thead className="data-table-thead">
+                <thead ref="dataTable-head" className="data-table-thead" onMouseMove={this.mouseMove}>
                   <tr>
                     <th>
                       <Input type="checkbox" standalone onChange={this.handleCheck} label=" " />
@@ -150,14 +182,48 @@ var Table = React.createClass({
                   </tr>
                 </thead>
                 <tbody>
-                  {rows}
+                  {_rows}
                 </tbody>
             </BSTable>
           </div>
         </div>
     );
   },
-  handleClick: function(sortField) {
+  handleClick: function(sortField, e) {
+    if (isResizing) {
+      this.refs['dataTable-head'].style['cursor'] = 'pointer';
+      isResizing = !isResizing, _x = null, _lx = null
+      return;
+    }
+    if (this.props.guides) {
+
+      var _alignment = e.target.parentElement.style['text-align'];
+
+      switch (_alignment) {
+        case 'left':
+           _alignment = 'center'
+          break;
+        case 'center':
+           _alignment = 'right'
+          break;
+        case 'right':
+           _alignment = 'left'
+          break;
+        default:
+        _alignment = 'center'
+      }
+
+      e.target.parentElement.style['text-align'] = _alignment
+
+      this.setState({
+        alignment: merge(this.state.alignment, {
+          [sortField]: _alignment
+        })
+      }, () => {
+        console.log("Alignment", this.state.alignment);
+      })
+      return;
+    }
     if (this.state.sortField == sortField && !this.state.reverse) {
       return this.setState({ sortField: sortField, override: false, reverse: true })
     } else {
@@ -174,15 +240,28 @@ var Table = React.createClass({
     })
     return row;
   },
-  resizeCol: function(selector){
-    var resize = setInterval(function(){
-      var col = document.getElementsByClassName(selector)[0]
-      var _currentWidth = parseInt(col.scrollWidth)
-      console.log("currentWidth", _currentWidth);
-      if (_currentWidth <= 50)
-        clearInterval(this)
-      col.style['width'] = _currentWidth - 1 + 'px'
-    }, 1)
+  resizeCol: function(selector) {
+    var col = document.getElementsByClassName(selector)[0]
+    resizing = col, isResizing = !isResizing, _x = null, _lx = null
+    this.refs['dataTable-head'].style['cursor'] = isResizing
+        ? 'col-resize'
+        : 'pointer';
+  },
+  mouseMove: function(e) {
+    if (!isResizing)
+      return false;
+    var col = resizing
+    var _currentWidth = col.scrollWidth
+    _x = _x || e.pageX
+    _lx = _lx || e.pageX
+    _w = _w || col.scrollWidth
+    if (e.pageX < _x) {
+      var width = _currentWidth - (_lx - e.pageX)
+    } else {
+      var width = _currentWidth + (e.pageX - _lx)
+    }
+    _lx = e.pageX
+    col.style['width'] = width + 'px'
   }
 });
 
@@ -210,6 +289,7 @@ var SearchBar = React.createClass({
               {routes}
             </DropdownButton>
           </div>
+          <Glyphicon glyph="cog" className="data-table-settings" onClick={this.props.toggleSettings} />
         </form>
       </div>
     );
@@ -221,6 +301,7 @@ var DataTable = React.createClass({
     return {
       filterText: ''
     , sortField: ''
+    , showSettings : true
     , rows: this.props.rows
     , columns: this.props.columns
     , routes: this.props.routes
@@ -241,6 +322,11 @@ var DataTable = React.createClass({
   handleSelect: function(e) {
     this.getData(e.target.text, this.props.routes[e.target.text])
   },
+  toggleSettings: function() {
+    this.setState({
+      showSettings: !this.state.showSettings
+    })
+  },
   render: function() {
     var columns = Object.keys(this.props.rows[0])
     return (
@@ -250,12 +336,14 @@ var DataTable = React.createClass({
           filterText={this.state.filterText}
           routes={this.state.routes}
           selectedRoute={this.state.selectedRoute || ''}
+          toggleSettings={this.toggleSettings}
           handleSelect={this.handleSelect} />
         <Table
           ref="dataTable"
           filterText={this.state.filterText}
           rows={this.state.rows}
           columns={this.state.columns}
+          guides={this.state.showSettings}
           override={false} />
       </Well>
     );
