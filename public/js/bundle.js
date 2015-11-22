@@ -51,20 +51,18 @@
 	var SlideMenu = __webpack_require__(4);
 	var DataTable = __webpack_require__(5);
 
-	var routes = {
-	  'Oscars': 'http://api.opendev.oscars.org/v1/assets/films?!fields=last_watched,poster,guid,slug,resume'
-	, 'Melody': 'http://localhost:8000/v1/assets/movies'
-	, 'Seasons':  'http://localhost:8000/v1/assets/series/seasons/episodes'
-	};
+	var routes = [{
+	  name: 'Oscars'
+	, endpoint: 'http://api.opendev.oscars.org/v1/assets/films?!fields=last_watched,poster,guid,slug,resume'
+	},{
+	  name: 'Analytics'
+	, endpoint: 'http://api.opendev.oscars.org/v1/analytics/traces'
+	, columns: {
+	    ignore: ['name', 'type', 'os', 'browser', 'language', 'events']
+	  }
+	}];
 
 	var App = React.createClass({displayName: "App",
-	  getInitialState: function() {
-	    return {
-	      isMenuOpen: false
-	    , rows: [{}]
-	    , columns: []
-	    };
-	  },
 	  render: function() {
 	    return (
 	      React.createElement("div", null, 
@@ -72,7 +70,7 @@
 	        React.createElement("div", {className: "container-fluid"}, 
 	          React.createElement(SlideMenu, null), 
 	          React.createElement("div", {id: "left", className: "col-md-12"}, 
-	            React.createElement(DataTable, {ref: "datatable", rows: this.state.rows, columns: this.state.columns, routes: routes})
+	            React.createElement(DataTable, {ref: "datatable", routes: routes})
 	          )
 	        )
 	      )
@@ -246,6 +244,8 @@
 	        var alignment = this.props.alignment[cell]
 	        var _alignment = 'align' + alignment.charAt(0).toUpperCase() + alignment.slice(1);
 	      }
+	      if (this.props.ignored.indexOf(cell) > -1)
+	        return;
 	      if (this.props.filterText.length >= 3)
 	        html = html.toString().replace(regex, '<span class="highlighted">$1</span>');
 	      _cells.push(React.createElement("td", {key: i, className: _alignment, dangerouslySetInnerHTML: { "__html": html}}))
@@ -287,6 +287,7 @@
 	      sortField: ''
 	    , checked: false
 	    , isResizing: false
+	    , routes: this.props.routes
 	    , columns: this.props.columns
 	    , override: this.props.override || false
 	    , headers:  JSON.parse(localStorage.getItem('headers'))      || {}
@@ -308,6 +309,7 @@
 	    }
 	    var _columns = []
 	    var _rows = []
+	    var _ignored = []
 	    var columns = state.columns
 	      .map(function(column, i){
 	        var selected = state.sortField == column
@@ -328,8 +330,18 @@
 	          ? this.state.headers[column]
 	          : column.charAt(0).toUpperCase() + column.slice(1);
 	        var title = props.guides
-	          ? React.createElement(Input, {type: "text", bsSize: "small", value: header, "data-key": column, ref: column + '-edit', className: className, standalone: true, onChange: this.editHeader.bind(this, column)})
+	          ? React.createElement(Input, {type: "text", bsSize: "small", disabled: this.state.isResizing, value: header, "data-key": column, ref: column + '-edit', className: className, standalone: true, onChange: this.editHeader.bind(this, column)})
 	          : header;
+	        var title = header
+	        var selectedRoute = this.props.selectedRoute
+	          if (this.state.routes[selectedRoute].hasOwnProperty('columns')) {
+	            if (this.state.routes[selectedRoute]['columns'].hasOwnProperty('ignore')) {
+	              _ignored = this.state.routes[selectedRoute]['columns']['ignore']
+	              if (_ignored.indexOf(column) > -1) {
+	                return;
+	              }
+	            }
+	          }
 	        _columns.push(
 	          React.createElement("th", {key: i, ref: "thead", className: selected, className, style: style || {}, onClick: this.handleClick.bind(this, column)}, 
 	            React.createElement("span", {className: "columnName"}, 
@@ -345,7 +357,7 @@
 	        row.hidden = true;
 	        props.columns.forEach(function(field, i){
 	          if (row.hasOwnProperty(field) && row[field].length > 0) {
-	            if (row[field].toLowerCase().indexOf(props.filterText.toLowerCase()) > -1) {
+	            if (row[field].toString().toLowerCase().indexOf(props.filterText.toLowerCase()) > -1) {
 	              row.hidden = false
 	            }
 	          }
@@ -381,6 +393,7 @@
 	          filterText: this.state.filterText, 
 	          alignment: this.state.alignment, 
 	          columns: this.state.columns, 
+	          ignored: _ignored, 
 	          guides: this.props.guides, 
 	          override: this.state.override}))
 	        if (this.props.guides && !row.hidden)
@@ -519,16 +532,18 @@
 	    );
 	  },
 	  render: function() {
-	    var routes = Object.keys(this.props.routes).map((route, i) => {
-	       return (React.createElement(MenuItem, {eventKey: i, key: i}, route))
-	    });
+	    var _routes = []
+	    for (var i in this.props.routes) {
+	      var route = this.props.routes[i]
+	      _routes.push(React.createElement(MenuItem, {eventKey: i, key: i}, route.name))
+	    }
 	    return (
 	      React.createElement("div", {className: "row table-search"}, 
 	        React.createElement("form", {className: "form-grop", onSubmit: this.handleSubmit}, 
 	          React.createElement("div", {className: "data-table-search-panel"}, 
 	            React.createElement("input", {ref: "filterTextInput", type: "search", autoFocus: true, className: "data-table-search-input form-control input-lg", value: this.props.filterText, onChange: this.handleChange, placeholder: "Search...", "aria-describedby": "sizing-addon1"}), 
 	            React.createElement(DropdownButton, {title: this.props.selectedRoute || 'Routes', id: "bg-nested-dropdown", bsSize: "lg", className: "data-table-filter-dropdown", onSelect: this.props.handleSelect}, 
-	              routes
+	              _routes
 	            )
 	          ), 
 	          React.createElement(Glyphicon, {glyph: "cog", className: "data-table-settings", onClick: this.props.toggleSettings})
@@ -544,25 +559,27 @@
 	      filterText: ''
 	    , sortField: ''
 	    , showSettings : false
-	    , rows: this.props.rows
-	    , columns: this.props.columns
+	    , rows: [{}]
+	    , columns: []
 	    , routes: this.props.routes
 	    };
 	  },
-	  getData: function(name, route) {
-	    this.setState({ rows: [{}], columns: [] }, () => {
-	      $.get(route, function(result) {
-	        if (this.isMounted()) {
-	          this.setState({ rows: result, columns: Object.keys(result[0]), selectedRoute: name });
-	        }
-	      }.bind(this));
-	    });
+	  getData: function(route) {
+	    if (!route.hasOwnProperty('endpoint'))
+	      return;
+	    $.get(route.endpoint, function(result) {
+	      if (this.isMounted()) {
+	        this.setState({ rows: result, columns: Object.keys(result[0]), selectedRoute: route.name }, () => {
+	          console.log("Route Fetched", 'state changed to', this.state.rows, this.state.columns);
+	        });
+	      }
+	    }.bind(this));
 	  },
 	  handleUserInput: function(filterText) {
 	    this.setState({ filterText: filterText });
 	  },
 	  handleSelect: function(e) {
-	    this.getData(e.target.text, this.props.routes[e.target.text])
+	    this.getData(this.state.routes[e.target.text])
 	  },
 	  toggleSettings: function() {
 	    this.setState({
@@ -570,7 +587,7 @@
 	    })
 	  },
 	  render: function() {
-	    var columns = Object.keys(this.props.rows[0])
+	    console.log("Renderind DataTable", this.state.routes);
 	    return (
 	      React.createElement(Well, {className: "data-table-well"}, 
 	        React.createElement(SearchBar, {
@@ -584,6 +601,8 @@
 	          ref: "dataTable", 
 	          filterText: this.state.filterText, 
 	          rows: this.state.rows, 
+	          routes: this.state.routes, 
+	          selectedRoute: this.state.selectedRoute || '', 
 	          columns: this.state.columns, 
 	          guides: this.state.showSettings, 
 	          override: false})
@@ -591,13 +610,23 @@
 	    );
 	  },
 	  componentWillMount: function() {
-	    for (var route in this.props.routes) break;
-	    this.setState({ selectedRoute: route }, function(){
-	      this.getData(route, this.props.routes[route])
+	    var routes = this.parseRoutes(this.props.routes)
+	    this.setState({
+	      routes: routes
+	    }, () => {
+	      for (var route in this.state.routes) break;
+	      this.getData(this.state.routes[route])
 	    })
 	  },
 	  componentDidMount: function() {
 
+	  },
+	  parseRoutes: function(routes) {
+	    var _routes = []
+	    routes.map((route, i) => {
+	      _routes[route.name] = route
+	    })
+	    return _routes;
 	  }
 	});
 

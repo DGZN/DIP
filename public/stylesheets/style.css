@@ -15,6 +15,7 @@ body {
     max-width: 150px;
     overflow: auto;
     padding: 6px;
+    padding-left: 8px;
     word-wrap: break-word;
 }
 
@@ -80,9 +81,9 @@ body {
 }
 
 .data-table-settings {
-  position: relative;
-  right: 20px;
-  top: 10px;
+  position: absolute;
+  right: 24px;
+  top: 30px;
   float: right;
   font-size: 15px !important;
   color: rgba(0,0,0,.5);
@@ -173,7 +174,7 @@ body {
 }
 
 .table-search {
-  padding: 25px;
+  padding: 0px 25px 15px 25px
 }
 
 .rowID {
