@@ -289,6 +289,7 @@
 	    , isResizing: false
 	    , columns: this.props.columns
 	    , override: this.props.override || false
+	    , headers:  JSON.parse(localStorage.getItem('headers'))      || {}
 	    , alignment:  JSON.parse(localStorage.getItem('alignment'))  || {}
 	    , dimensions: JSON.parse(localStorage.getItem('dimensions')) || {}
 	    };
@@ -323,10 +324,16 @@
 	            width: width
 	          }
 	        }
+	        var header = this.state.headers[column]
+	          ? this.state.headers[column]
+	          : column.charAt(0).toUpperCase() + column.slice(1);
+	        var title = props.guides
+	          ? React.createElement(Input, {type: "text", bsSize: "small", value: header, "data-key": column, ref: column + '-edit', className: className, standalone: true, onChange: this.editHeader.bind(this, column)})
+	          : header;
 	        _columns.push(
 	          React.createElement("th", {key: i, ref: "thead", className: selected, className, style: style || {}, onClick: this.handleClick.bind(this, column)}, 
 	            React.createElement("span", {className: "columnName"}, 
-	              column.charAt(0).toUpperCase() + column.slice(1)
+	              title
 	            )
 	          )
 	        )
@@ -409,9 +416,10 @@
 	    if (isResizing) {
 	      this.refs['dataTable-head'].style['cursor'] = 'pointer';
 	      var col = resizing
+	      var column = col.getElementsByTagName('input')[0].value.toLowerCase();
 	      this.setState({
 	        dimensions: merge(this.state.dimensions, {
-	          [col.firstChild.innerHTML.toLowerCase()]: _width + 'px'
+	          [column]: _width + 'px'
 	        })
 	      }, () => {
 	        localStorage.setItem('dimensions', JSON.stringify(this.state.dimensions));
@@ -463,6 +471,15 @@
 	      row[column] = row[column].toString().replace(keyword, '<span class="highlighted">' + keyword + '</span>')
 	    })
 	    return row;
+	  },
+	  editHeader: function(header, e) {
+	    this.setState({
+	      headers: merge(this.state.headers, {
+	        [header]: e.target.value
+	      })
+	    }, () => {
+	      localStorage.setItem('headers', JSON.stringify(this.state.headers));
+	    })
 	  },
 	  resizeCol: function(selector) {
 	    var col = document.getElementsByClassName(selector)[0]
@@ -526,7 +543,7 @@
 	    return {
 	      filterText: ''
 	    , sortField: ''
-	    , showSettings : true
+	    , showSettings : false
 	    , rows: this.props.rows
 	    , columns: this.props.columns
 	    , routes: this.props.routes

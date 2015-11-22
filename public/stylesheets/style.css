@@ -36,6 +36,7 @@ body {
   background-color: none;
   border: 0px solid !important;
   padding: 0px !important;
+  cursor: col-resize;
 }
 
 .resizeCursor {
@@ -91,6 +92,7 @@ body {
 
 .data-table-settings:hover {
   border: 2px solid black;
+  color: blue;
 }
 
 
