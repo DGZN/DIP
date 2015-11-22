@@ -86,7 +86,14 @@ body {
   font-size: 15px !important;
   color: rgba(0,0,0,.5);
   border: none !important;
+  cursor: pointer;
 }
+
+.data-table-settings:hover {
+  border: 2px solid black;
+}
+
+
 
 .data-table-filter-dropdown .btn-default:hover {
     color: #333;

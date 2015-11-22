@@ -74,17 +74,18 @@ var ResizeRow = React.createClass({
   }
 })
 
-var _x, _lx, _w, resizing, isResizing;
+var _x, _lx, _w, _width, resizing, isResizing;
 
 var Table = React.createClass({
   getInitialState: function() {
     return {
       sortField: ''
     , checked: false
-    , override: this.props.override || false
-    , columns: this.props.columns
-    , alignment: {}
     , isResizing: false
+    , columns: this.props.columns
+    , override: this.props.override || false
+    , alignment:  JSON.parse(localStorage.getItem('alignment'))  || {}
+    , dimensions: JSON.parse(localStorage.getItem('dimensions')) || {}
     };
   },
   componentWillReceiveProps: function(props) {
@@ -107,8 +108,18 @@ var Table = React.createClass({
           ? 'sort-selection-field'
           : '';
         var className = i+'-resize'
+        if (this.state.alignment.hasOwnProperty(column)) {
+          var alignment = this.state.alignment[column]
+          className += ' align' + alignment.charAt(0).toUpperCase() + alignment.slice(1);
+        }
+        if (this.state.dimensions.hasOwnProperty(column)) {
+          var width = this.state.dimensions[column]
+          var style = {
+            width: width
+          }
+        }
         _columns.push(
-          <th key={i} ref="thead" className={selected, className} onClick={this.handleClick.bind(this, column)}>
+          <th key={i} ref="thead" className={selected, className} style={style || {}} onClick={this.handleClick.bind(this, column)}>
             <span className="columnName">
               {column.charAt(0).toUpperCase() + column.slice(1)}
             </span>
@@ -133,8 +144,8 @@ var Table = React.createClass({
         if (!state.sortField) return;
         var field = state.sortField;
         if (a[field].length < 1 || b[field].length < 1) {
-          var aVal = (a[field] || ' ')
-          var bVal = (b[field] || ' ')
+          var aVal = a[field] || ' '
+          var bVal = b[field] || ' '
           if(aVal < bVal) return positive;
           if(aVal > bVal) return negative;
         }
@@ -192,7 +203,15 @@ var Table = React.createClass({
   handleClick: function(sortField, e) {
     if (isResizing) {
       this.refs['dataTable-head'].style['cursor'] = 'pointer';
-      isResizing = !isResizing, _x = null, _lx = null
+      var col = resizing
+      this.setState({
+        dimensions: merge(this.state.dimensions, {
+          [col.firstChild.innerHTML.toLowerCase()]: _width + 'px'
+        })
+      }, () => {
+        localStorage.setItem('dimensions', JSON.stringify(this.state.dimensions));
+        isResizing = !isResizing, _x = null, _lx = null
+      })
       return;
     }
     if (this.props.guides) {
@@ -219,6 +238,8 @@ var Table = React.createClass({
         alignment: merge(this.state.alignment, {
           [sortField]: _alignment
         })
+      }, () => {
+        localStorage.setItem('alignment', JSON.stringify(this.state.alignment));
       })
       return;
     }
@@ -259,6 +280,7 @@ var Table = React.createClass({
       var width = _currentWidth + (e.pageX - _lx)
     }
     _lx = e.pageX
+    _width = width
     col.style['width'] = width + 'px'
   }
 });
