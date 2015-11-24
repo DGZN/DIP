@@ -51,16 +51,62 @@
 	var SlideMenu = __webpack_require__(4);
 	var DataTable = __webpack_require__(5);
 
+	// var routes = [{
+	//   name: 'Oscars'
+	// , endpoint: 'http://api.opendev.oscars.org/v1/assets/films?!fields=last_watched,guid,slug,resume'
+	// },{
+	//   name: 'Analytics'
+	// , endpoint: 'http://api.opendev.oscars.org/v1/analytics/traces'
+	// , columns: {
+	//     ignore: ['name', 'type', 'os', 'browser', 'language', 'events']
+	//   }
+	// }];
+
 	var routes = [{
-	  name: 'Oscars'
-	, endpoint: 'http://api.opendev.oscars.org/v1/assets/films?!fields=last_watched,poster,guid,slug,resume'
-	},{
-	  name: 'Analytics'
-	, endpoint: 'http://api.opendev.oscars.org/v1/analytics/traces'
+	  name: 'Series'
+	, endpoint: 'http://localhost:8000/v1/assets/series'
 	, columns: {
-	    ignore: ['name', 'type', 'os', 'browser', 'language', 'events']
+	    ignore:  ['seasons', 'meta']
+	  , include: ['meta.en.name as name']
+	  , headers: ['id', 'name']
+	  }
+	},{
+	  name: 'Seasons'
+	, endpoint: 'http://localhost:8000/v1/assets/series/seasons'
+	, columns: {
+	    ignore: ['meta', 'episodes']
+	  }
+	},{
+	  name: 'Episodes'
+	, endpoint: 'http://localhost:8000/v1/assets/series/seasons/episodes'
+	},{
+	  name: 'Albums'
+	, endpoint: 'http://localhost:8000/v1/assets/albums'
+	, columns: {
+	    ignore: ['meta', 'songs']
+	  }
+	},{
+	  name: 'Songs'
+	, endpoint: 'http://localhost:8000/v1/assets/albums/songs'
+	, columns: {
+	    ignore: ['']
+	  }
+	},{
+	  name: 'Movies'
+	, endpoint: 'http://localhost:8000/v1/assets/movies'
+	, columns: {
+	    ignore: ['meta']
+	  }
+	},{
+	  name: 'Plays'
+	, endpoint: 'http://localhost:8000/v1/assets/plays'
+	, columns: {
+	    ignore: ['plays']
 	  }
 	}];
+
+
+
 
 	var App = React.createClass({displayName: "App",
 	  render: function() {
@@ -231,15 +277,26 @@
 	      this.setState(nextProps)
 	  },
 	  render: function() {
-	    if (this.props.override || this.state.override)
-	      var isChecked = this.props.checked
-	    var checked = isChecked
+
+	    var checked = (this.props.override || this.state.override)
 	      ? React.createElement(Input, {type: "checkbox", onChange: this.handleCheck, checked: true, label: " "})
 	      : React.createElement(Input, {type: "checkbox", onChange: this.handleCheck, label: " "})
 	    var _cells = [];
-	    var cells = this.props.columns.map(function(cell, i){
+
+
+	    var _cols = this.props.columns
+	    var _columns = ['id', 'name', 'description']
+	    _columns.push(..._cols)
+	    delete _columns[3]
+
+	    var _row = this.props.row
+	    _row['name'] = _row['meta'].en.name
+	    _row['description'] = _row['meta'].en.description
+
+
+	    var cells = _columns.map(function(cell, i){
 	      var regex = new RegExp( '(' + this.props.filterText + ')', 'gi' );
-	      var html = this.props.row[cell];
+	      var html = _row[cell];
 	      if (this.props.alignment.hasOwnProperty(cell)) {
 	        var alignment = this.props.alignment[cell]
 	        var _alignment = 'align' + alignment.charAt(0).toUpperCase() + alignment.slice(1);
@@ -310,8 +367,16 @@
 	    var _columns = []
 	    var _rows = []
 	    var _ignored = []
-	    var columns = state.columns
-	      .map(function(column, i){
+
+	    if (state.columns.length) {
+	      var cols = ['id','name', 'description']
+	      cols.push(...state.columns)
+	      delete cols[3]
+	    } else {
+	      var cols = state.columns
+	    }
+
+	    cols.map(function(column, i){
 	        var selected = state.sortField == column
 	          ? 'sort-selection-field'
 	          : '';
@@ -332,7 +397,6 @@
 	        var title = props.guides
 	          ? React.createElement(Input, {type: "text", bsSize: "small", disabled: this.state.isResizing, value: header, "data-key": column, ref: column + '-edit', className: className, standalone: true, onChange: this.editHeader.bind(this, column)})
 	          : header;
-	        var title = header
 	        var selectedRoute = this.props.selectedRoute
 	          if (this.state.routes[selectedRoute].hasOwnProperty('columns')) {
 	            if (this.state.routes[selectedRoute]['columns'].hasOwnProperty('ignore')) {
@@ -393,6 +457,7 @@
 	          filterText: this.state.filterText, 
 	          alignment: this.state.alignment, 
 	          columns: this.state.columns, 
+	          aliases: this.state.aliases, 
 	          ignored: _ignored, 
 	          guides: this.props.guides, 
 	          override: this.state.override}))
@@ -569,8 +634,13 @@
 	      return;
 	    $.get(route.endpoint, function(result) {
 	      if (this.isMounted()) {
-	        this.setState({ rows: result, columns: Object.keys(result[0]), selectedRoute: route.name }, () => {
-	          console.log("Route Fetched", 'state changed to', this.state.rows, this.state.columns);
+	        if (route.columns && route.columns.include)
+	          var columnAliases = route.columns.include
+	        this.setState({
+	          rows: result
+	        , columns: Object.keys(result[0])
+	        , selectedRoute: route.name
+	        , columnAliases: columnAliases || []
 	        });
 	      }
 	    }.bind(this));
@@ -587,7 +657,6 @@
 	    })
 	  },
 	  render: function() {
-	    console.log("Renderind DataTable", this.state.routes);
 	    return (
 	      React.createElement(Well, {className: "data-table-well"}, 
 	        React.createElement(SearchBar, {
@@ -604,6 +673,7 @@
 	          routes: this.state.routes, 
 	          selectedRoute: this.state.selectedRoute || '', 
 	          columns: this.state.columns, 
+	          aliases: this.state.columnAliases, 
 	          guides: this.state.showSettings, 
 	          override: false})
 	      )

@@ -28,15 +28,26 @@ var Row = React.createClass({
       this.setState(nextProps)
   },
   render: function() {
-    if (this.props.override || this.state.override)
-      var isChecked = this.props.checked
-    var checked = isChecked
+
+    var checked = (this.props.override || this.state.override)
       ? <Input type="checkbox" onChange={this.handleCheck} checked label=" " />
       : <Input type="checkbox" onChange={this.handleCheck} label=" " />
     var _cells = [];
-    var cells = this.props.columns.map(function(cell, i){
+
+
+    var _cols = this.props.columns
+    var _columns = ['id', 'name', 'description']
+    _columns.push(..._cols)
+    delete _columns[3]
+
+    var _row = this.props.row
+    _row['name'] = _row['meta'].en.name
+    _row['description'] = _row['meta'].en.description
+
+
+    var cells = _columns.map(function(cell, i){
       var regex = new RegExp( '(' + this.props.filterText + ')', 'gi' );
-      var html = this.props.row[cell];
+      var html = _row[cell];
       if (this.props.alignment.hasOwnProperty(cell)) {
         var alignment = this.props.alignment[cell]
         var _alignment = 'align' + alignment.charAt(0).toUpperCase() + alignment.slice(1);
@@ -107,8 +118,16 @@ var Table = React.createClass({
     var _columns = []
     var _rows = []
     var _ignored = []
-    var columns = state.columns
-      .map(function(column, i){
+
+    if (state.columns.length) {
+      var cols = ['id','name', 'description']
+      cols.push(...state.columns)
+      delete cols[3]
+    } else {
+      var cols = state.columns
+    }
+
+    cols.map(function(column, i){
         var selected = state.sortField == column
           ? 'sort-selection-field'
           : '';
@@ -189,6 +208,7 @@ var Table = React.createClass({
           filterText={this.state.filterText}
           alignment={this.state.alignment}
           columns={this.state.columns}
+          aliases={this.state.aliases}
           ignored={_ignored}
           guides={this.props.guides}
           override={this.state.override}  />)
@@ -365,8 +385,13 @@ var DataTable = React.createClass({
       return;
     $.get(route.endpoint, function(result) {
       if (this.isMounted()) {
-        this.setState({ rows: result, columns: Object.keys(result[0]), selectedRoute: route.name }, () => {
-          console.log("Route Fetched", 'state changed to', this.state.rows, this.state.columns);
+        if (route.columns && route.columns.include)
+          var columnAliases = route.columns.include
+        this.setState({
+          rows: result
+        , columns: Object.keys(result[0])
+        , selectedRoute: route.name
+        , columnAliases: columnAliases || []
         });
       }
     }.bind(this));
@@ -383,7 +408,6 @@ var DataTable = React.createClass({
     })
   },
   render: function() {
-    console.log("Renderind DataTable", this.state.routes);
     return (
       <Well className="data-table-well">
         <SearchBar
@@ -400,6 +424,7 @@ var DataTable = React.createClass({
           routes={this.state.routes}
           selectedRoute={this.state.selectedRoute || ''}
           columns={this.state.columns}
+          aliases={this.state.columnAliases}
           guides={this.state.showSettings}
           override={false} />
       </Well>
