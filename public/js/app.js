@@ -3,7 +3,8 @@ var ReactDOM = require('react-dom');
 
 var NavBar = require('./navBar.js');
 var SlideMenu = require('./menu.js');
-var DataTable = require('./table.js');
+//var DataTable = require('./table.js');
+var DataTable = require('./components/datatable');
 
 // var routes = [{
 //   name: 'Oscars'
