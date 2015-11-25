@@ -106,6 +106,15 @@
 	  }
 	}];
 
+	var rows = [{
+	  firstName: 'Keiichi'
+	, lastName: 'Lindley'
+	, userName: 'DGZN'
+	},{
+	  firstName: 'Sam'
+	, lastName: 'Smith'
+	, userName: 'SMITHY'
+	}]
 
 
 
@@ -117,7 +126,7 @@
 	        React.createElement("div", {className: "container-fluid"}, 
 	          React.createElement(SlideMenu, null), 
 	          React.createElement("div", {id: "left", className: "col-md-12"}, 
-	            React.createElement(DataTable, {ref: "datatable", routes: routes})
+	            React.createElement(DataTable, {ref: "datatable", routes: routes, rows: rows})
 	          )
 	        )
 	      )
@@ -249,21 +258,25 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	 var React = __webpack_require__(1),
+	  ReactDOM = __webpack_require__(2),
 	     Table = ReactBootstrap.Table,
 	      Head = __webpack_require__(6),
 	      Body = __webpack_require__(8);
 
+
 	var DataTable = React.createClass({displayName: "DataTable",
 
-	  getInitialState: () => {
-	    return {};
+	  getInitialState: function(){
+	    return {
+
+	    };
 	  },
 
-	  render: () => {
+	  render: function(){
 	    return (
 	      React.createElement(Table, {striped: true, bordered: true, hover: true}, 
 	        React.createElement(Head, null), 
-	        React.createElement(Body, null)
+	        React.createElement(Body, {rows: this.props.rows})
 	      )
 	    )
 	  }
@@ -330,7 +343,16 @@
 
 
 	var Body = React.createClass({displayName: "Body",
-	  render: () => {
+
+	  getInitialState: function(){
+	    console.log("Body Initial State", this.props)
+	    return {
+
+	    }
+	  },
+
+	  render: function(){
+	    console.log("Rendering tbody with rows", this.props.rows)
 	    return (
 	      React.createElement("tbody", null, 
 	        React.createElement(Row, null)

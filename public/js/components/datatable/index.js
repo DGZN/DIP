@@ -1,19 +1,23 @@
  var React = require('react'),
+  ReactDOM = require('react-dom'),
      Table = ReactBootstrap.Table,
       Head = require('./head'),
       Body = require('./body');
 
+
 var DataTable = React.createClass({
 
-  getInitialState: () => {
-    return {};
+  getInitialState: function(){
+    return {
+
+    };
   },
 
-  render: () => {
+  render: function(){
     return (
       <Table striped bordered hover>
         <Head />
-        <Body />
+        <Body rows={this.props.rows} />
       </Table>
     )
   }

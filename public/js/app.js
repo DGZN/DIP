@@ -60,6 +60,15 @@ var routes = [{
   }
 }];
 
+var rows = [{
+  firstName: 'Keiichi'
+, lastName: 'Lindley'
+, userName: 'DGZN'
+},{
+  firstName: 'Sam'
+, lastName: 'Smith'
+, userName: 'SMITHY'
+}]
 
 
 
@@ -71,7 +80,7 @@ var App = React.createClass({
         <div className="container-fluid">
           <SlideMenu />
           <div id="left" className="col-md-12">
-            <DataTable ref="datatable" routes={routes} />
+            <DataTable ref="datatable" routes={routes} rows={rows} />
           </div>
         </div>
       </div>
