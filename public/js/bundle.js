@@ -248,54 +248,11 @@
 /* 5 */
 /***/ function(module, exports, __webpack_require__) {
 
-	     var React = __webpack_require__(1),
-	      ReactDOM = __webpack_require__(2),
-	         merge = __webpack_require__(6),
-	          Well = ReactBootstrap.Well,
-	         Input = ReactBootstrap.Input,
-	         Check = ReactBootstrap.Check,
-	         Table = ReactBootstrap.Table,
-	      MenuItem = ReactBootstrap.MenuItem,
-	     Glyphicon = ReactBootstrap.Glyphicon,
-	DropdownButton = ReactBootstrap.DropdownButton;
-
-
-	const header = (
-	  React.createElement("tr", null, 
-	    React.createElement("td", null, "1"), 
-	    React.createElement("td", null, "Mark"), 
-	    React.createElement("td", null, "Otto"), 
-	    React.createElement("td", null, "@mdo")
-	  )
-	)
-
-	const row = (
-	  React.createElement("tr", null, 
-	    React.createElement("th", null, "#"), 
-	    React.createElement("th", null, "First Name"), 
-	    React.createElement("th", null, "Last Name"), 
-	    React.createElement("th", null, "Username")
-	  )
-	)
-
-	const thead = (
-	  React.createElement("thead", null, 
-	    header
-	  )
-	)
-
-	const tbody = (
-	  React.createElement("tbody", null, 
-	    row
-	  )
-	)
-
-	const table = (
-	  React.createElement(Table, {striped: true, bordered: true, hover: true}, 
-	    thead, 
-	    tbody
-	  )
-	);
+	 var React = __webpack_require__(1),
+	  ReactDOM = __webpack_require__(2),
+	     Table = ReactBootstrap.Table,
+	      Head = __webpack_require__(6),
+	      Body = __webpack_require__(8);
 
 	var DataTable = React.createClass({displayName: "DataTable",
 
@@ -304,7 +261,12 @@
 	  },
 
 	  render: () => {
-	    return table
+	    return (
+	      React.createElement(Table, {striped: true, bordered: true, hover: true}, 
+	        React.createElement(Head, null), 
+	        React.createElement(Body, null)
+	      )
+	    )
 	  }
 
 	})
@@ -316,197 +278,102 @@
 /* 6 */
 /***/ function(module, exports, __webpack_require__) {
 
-	/* WEBPACK VAR INJECTION */(function(module) {/*!
-	 * @name JavaScript/NodeJS Merge v1.2.0
-	 * @author yeikos
-	 * @repository https://github.com/yeikos/js.merge
+	var React = __webpack_require__(1),
+	 ReactDOM = __webpack_require__(2),
+	   Header = __webpack_require__(7);
 
-	 * Copyright 2014 yeikos - MIT license
-	 * https://raw.github.com/yeikos/js.merge/master/LICENSE
-	 */
+	var Head = React.createClass({displayName: "Head",
 
-	;(function(isNode) {
+	  getInitialState: () => {
+	    return {}
+	  },
 
-		/**
-		 * Merge one or more objects 
-		 * @param bool? clone
-		 * @param mixed,... arguments
-		 * @return object
-		 */
+	  render: () => {
+	    return (
+	      React.createElement("thead", null, 
+	        React.createElement(Header, null)
+	      )
+	    )
+	  }
 
-		var Public = function(clone) {
+	})
 
-			return merge(clone === true, false, arguments);
+	module.exports = Head;
 
-		}, publicName = 'merge';
-
-		/**
-		 * Merge two or more objects recursively 
-		 * @param bool? clone
-		 * @param mixed,... arguments
-		 * @return object
-		 */
-
-		Public.recursive = function(clone) {
-
-			return merge(clone === true, true, arguments);
-
-		};
-
-		/**
-		 * Clone the input removing any reference
-		 * @param mixed input
-		 * @return mixed
-		 */
-
-		Public.clone = function(input) {
-
-			var output = input,
-				type = typeOf(input),
-				index, size;
-
-			if (type === 'array') {
-
-				output = [];
-				size = input.length;
-
-				for (index=0;index<size;++index)
-
-					output[index] = Public.clone(input[index]);
-
-			} else if (type === 'object') {
-
-				output = {};
-
-				for (index in input)
-
-					output[index] = Public.clone(input[index]);
-
-			}
-
-			return output;
-
-		};
-
-		/**
-		 * Merge two objects recursively
-		 * @param mixed input
-		 * @param mixed extend
-		 * @return mixed
-		 */
-
-		function merge_recursive(base, extend) {
-
-			if (typeOf(base) !== 'object')
-
-				return extend;
-
-			for (var key in extend) {
-
-				if (typeOf(base[key]) === 'object' && typeOf(extend[key]) === 'object') {
-
-					base[key] = merge_recursive(base[key], extend[key]);
-
-				} else {
-
-					base[key] = extend[key];
-
-				}
-
-			}
-
-			return base;
-
-		}
-
-		/**
-		 * Merge two or more objects
-		 * @param bool clone
-		 * @param bool recursive
-		 * @param array argv
-		 * @return object
-		 */
-
-		function merge(clone, recursive, argv) {
-
-			var result = argv[0],
-				size = argv.length;
-
-			if (clone || typeOf(result) !== 'object')
-
-				result = {};
-
-			for (var index=0;index<size;++index) {
-
-				var item = argv[index],
-
-					type = typeOf(item);
-
-				if (type !== 'object') continue;
-
-				for (var key in item) {
-
-					var sitem = clone ? Public.clone(item[key]) : item[key];
-
-					if (recursive) {
-
-						result[key] = merge_recursive(result[key], sitem);
-
-					} else {
-
-						result[key] = sitem;
-
-					}
-
-				}
-
-			}
-
-			return result;
-
-		}
-
-		/**
-		 * Get type of variable
-		 * @param mixed input
-		 * @return string
-		 *
-		 * @see http://jsperf.com/typeofvar
-		 */
-
-		function typeOf(input) {
-
-			return ({}).toString.call(input).slice(8, -1).toLowerCase();
-
-		}
-
-		if (isNode) {
-
-			module.exports = Public;
-
-		} else {
-
-			window[publicName] = Public;
-
-		}
-
-	})(typeof module === 'object' && module && typeof module.exports === 'object' && module.exports);
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(7)(module)))
 
 /***/ },
 /* 7 */
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
 
-	module.exports = function(module) {
-		if(!module.webpackPolyfill) {
-			module.deprecate = function() {};
-			module.paths = [];
-			// module.parent = undefined by default
-			module.children = [];
-			module.webpackPolyfill = 1;
-		}
-		return module;
-	}
+	var React = __webpack_require__(1),
+	 ReactDOM = __webpack_require__(2);
+
+
+	var Header = React.createClass({displayName: "Header",
+	 render: () => {
+	   return (
+	     React.createElement("tr", null, 
+	       React.createElement("th", null, "#"), 
+	       React.createElement("th", null, "First Name"), 
+	       React.createElement("th", null, "Last Name"), 
+	       React.createElement("th", null, "Username")
+	     )
+	   )
+	 }
+	})
+
+	module.exports = Header;
+
+
+/***/ },
+/* 8 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var React = __webpack_require__(1),
+	 ReactDOM = __webpack_require__(2),
+	      Row = __webpack_require__(9);
+
+
+	var Body = React.createClass({displayName: "Body",
+	  render: () => {
+	    return (
+	      React.createElement("tbody", null, 
+	        React.createElement(Row, null)
+	      )
+	    )
+	  }
+	})
+
+	module.exports = Body;
+
+
+/***/ },
+/* 9 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var React = __webpack_require__(1),
+	 ReactDOM = __webpack_require__(2);
+
+	var Row = React.createClass({displayName: "Row",
+
+	  getInitialState: () => {
+	    return {}
+	  },
+
+	  render: () => {
+	    return (
+	      React.createElement("tr", null, 
+	        React.createElement("td", null, "1"), 
+	        React.createElement("td", null, "Mark"), 
+	        React.createElement("td", null, "Otto"), 
+	        React.createElement("td", null, "@mdo")
+	      )
+	    )
+	  }
+
+	})
+
+	module.exports = Row;
 
 
 /***/ }
