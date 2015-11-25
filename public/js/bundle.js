@@ -249,7 +249,6 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	 var React = __webpack_require__(1),
-	  ReactDOM = __webpack_require__(2),
 	     Table = ReactBootstrap.Table,
 	      Head = __webpack_require__(6),
 	      Body = __webpack_require__(8);
@@ -279,7 +278,6 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var React = __webpack_require__(1),
-	 ReactDOM = __webpack_require__(2),
 	   Header = __webpack_require__(7);
 
 	var Head = React.createClass({displayName: "Head",
@@ -305,9 +303,7 @@
 /* 7 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var React = __webpack_require__(1),
-	 ReactDOM = __webpack_require__(2);
-
+	var React = __webpack_require__(1);
 
 	var Header = React.createClass({displayName: "Header",
 	 render: () => {
@@ -330,7 +326,6 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var React = __webpack_require__(1),
-	 ReactDOM = __webpack_require__(2),
 	      Row = __webpack_require__(9);
 
 
@@ -351,8 +346,7 @@
 /* 9 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var React = __webpack_require__(1),
-	 ReactDOM = __webpack_require__(2);
+	var React = __webpack_require__(1);
 
 	var Row = React.createClass({displayName: "Row",
 

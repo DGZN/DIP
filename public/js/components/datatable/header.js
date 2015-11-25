@@ -1,6 +1,4 @@
-var React = require('react'),
- ReactDOM = require('react-dom');
-
+var React = require('react');
 
 var Header = React.createClass({
  render: () => {
