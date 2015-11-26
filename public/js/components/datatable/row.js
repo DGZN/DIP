@@ -2,21 +2,17 @@ var React = require('react');
 
 var Row = React.createClass({
 
-  getInitialState: () => {
-    return {}
+  render: function(){
+    return this.getRow(this.props);
   },
 
-  render: () => {
-    return (
-      <tr>
-        <td>1</td>
-        <td>Mark</td>
-        <td>Otto</td>
-        <td>@mdo</td>
-      </tr>
-    )
+  getRow: function(props){
+    var columns = [<td key={'td.index.'+Date()}>{props.index}</td>];
+    for(var prop in props.data){
+      columns.push(<td key={props.index + '.' + prop}>{props.data[prop]}</td>)
+    }
+    return <tr>{columns}</tr>;
   }
-
 })
 
 module.exports = Row;

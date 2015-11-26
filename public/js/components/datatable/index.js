@@ -9,17 +9,25 @@ var DataTable = React.createClass({
 
   getInitialState: function(){
     return {
-
-    };
+      order: ''
+    }
   },
 
   render: function(){
     return (
       <Table striped bordered hover>
-        <Head />
-        <Body rows={this.props.rows} />
+        <Head
+          click={this.handleClick}
+          columns={Object.keys(this.props.rows[0])} />
+        <Body rows={this.props.rows} filter="" order={this.state.order} />
       </Table>
     )
+  },
+
+  handleClick: function(e){
+    this.setState({
+      order: e.target.innerHTML
+    })
   }
 
 })

@@ -3,18 +3,17 @@ var React = require('react'),
 
 var Head = React.createClass({
 
-  getInitialState: () => {
+  getInitialState: function(){
     return {}
   },
 
-  render: () => {
+  render: function(){
     return (
       <thead>
-        <Header />
+        <Header columns={this.props.columns} click={this.props.click} />
       </thead>
     )
   }
-
 })
 
 module.exports = Head;
