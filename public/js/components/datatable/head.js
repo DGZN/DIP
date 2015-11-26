@@ -9,8 +9,8 @@ var Head = React.createClass({
 
   render: function(){
     return (
-      <thead>
-        <Header columns={this.props.columns} click={this.props.click} />
+      <thead style={{ cursor: 'pointer' }}>
+        <Header ref="header" columns={this.props.columns} click={this.props.click} resize={this.props.resize} mouseMove={this.props.mouseMove} />
       </thead>
     )
   }

@@ -280,3 +280,19 @@ body {
     -o-transition: right 1s ease-in-out;
     transition: right 1s ease-in-out;
 }
+
+
+
+/* DGZN DataTable */
+
+.header-resize {
+  position: absolute;
+  width: 5px;
+  left: 200px;
+  background: rgba(0,0,0,1);
+  opacity: .8;
+  height: 100%;
+  padding: 1px !important;
+  border: 0px !important;
+  display: table-column;
+}

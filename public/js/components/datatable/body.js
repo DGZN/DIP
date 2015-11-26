@@ -3,6 +3,21 @@ var React = require('react'),
 
 var Body = React.createClass({
 
+  getInitialState: function(){
+    return {
+      reverse: false
+    }
+  },
+
+  componentWillReceiveProps: function(props){
+
+    if (props.order == this.props.order)
+      this.setState({
+        reverse: !this.state.reverse
+      })
+
+  },
+
   render: function(){
     return (
       <tbody>
@@ -24,19 +39,18 @@ var Body = React.createClass({
     if (!this.props.filter)
       return true;
     for (var prop in row)
-      if (row[prop].indexOf(this.props.filter) > -1)
+      if (row[prop].toString().indexOf(this.props.filter) > -1)
         return true;
     return false;
   },
 
   order: function(props){
-    if (!props.order)
-      return props.rows;
-    var _rows = props.rows.sort(function(a, b){
+    if (!props.order) return props.rows;
+    var rows = props.rows.sort(function(a, b){
       var sortProp = props.order.toLowerCase()
-      return a[sortProp] > b[sortProp]
-    })
-    return _rows;
+      return a[sortProp] > b[sortProp] ? 1 : -1;
+    });
+    return this.state.reverse ? rows.reverse() : rows;
   }
 
 })

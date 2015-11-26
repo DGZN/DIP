@@ -1,6 +1,7 @@
 var React = require('react');
 var ReactDOM = require('react-dom');
 var Faker = require('faker');
+var Input = ReactBootstrap.Input;
 
 var NavBar = require('./navBar.js');
 var SlideMenu = require('./menu.js');
@@ -19,7 +20,7 @@ var DataTable = require('./components/datatable');
 
 function fakeRows(){
   var rows = []
-  while(rows.length < 250)
+  while(rows.length < 300)
     rows.push({
       id:    Faker.random.number(3)
     , name:  Faker.Name.findName()
@@ -75,6 +76,13 @@ var routes = [{
 }];
 
 var App = React.createClass({
+
+  getInitialState: function(){
+    return {
+      filter: ''
+    }
+  },
+
   render: function() {
     return (
       <div>
@@ -82,11 +90,18 @@ var App = React.createClass({
         <div className="container-fluid">
           <SlideMenu />
           <div id="left" className="col-md-12">
-            <DataTable ref="datatable" rows={fakeRows()} />
+            <Input type="text" placeholder="Search...." onChange={this.filter} value={this.state.filter} autoFocus />
+            <DataTable ref="datatable" rows={fakeRows()} filter={this.state.filter} />
           </div>
         </div>
       </div>
     );
+  },
+
+  filter: function(e){
+    this.setState({
+      filter: e.target.value
+    })
   }
 });
 ReactDOM.render(

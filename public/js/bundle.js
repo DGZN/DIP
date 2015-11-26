@@ -47,6 +47,7 @@
 	var React = __webpack_require__(1);
 	var ReactDOM = __webpack_require__(2);
 	var Faker = __webpack_require__(3);
+	var Input = ReactBootstrap.Input;
 
 	var NavBar = __webpack_require__(16);
 	var SlideMenu = __webpack_require__(17);
@@ -65,7 +66,7 @@
 
 	function fakeRows(){
 	  var rows = []
-	  while(rows.length < 1500)
+	  while(rows.length < 300)
 	    rows.push({
 	      id:    Faker.random.number(3)
 	    , name:  Faker.Name.findName()
@@ -121,6 +122,13 @@
 	}];
 
 	var App = React.createClass({displayName: "App",
+
+	  getInitialState: function(){
+	    return {
+	      filter: ''
+	    }
+	  },
+
 	  render: function() {
 	    return (
 	      React.createElement("div", null, 
@@ -128,11 +136,18 @@
 	        React.createElement("div", {className: "container-fluid"}, 
 	          React.createElement(SlideMenu, null), 
 	          React.createElement("div", {id: "left", className: "col-md-12"}, 
-	            React.createElement(DataTable, {ref: "datatable", routes: routes, rows: fakeRows()})
+	            React.createElement(Input, {type: "text", placeholder: "Search....", onChange: this.filter, value: this.state.filter, autoFocus: true}), 
+	            React.createElement(DataTable, {ref: "datatable", rows: fakeRows(), filter: this.state.filter})
 	          )
 	        )
 	      )
 	    );
+	  },
+
+	  filter: function(e){
+	    this.setState({
+	      filter: e.target.value
+	    })
 	  }
 	});
 	ReactDOM.render(
@@ -2461,6 +2476,7 @@
 	  getInitialState: function(){
 	    return {
 	      order: ''
+	    , resizing: false
 	    }
 	  },
 
@@ -2468,17 +2484,46 @@
 	    return (
 	      React.createElement(Table, {striped: true, bordered: true, hover: true}, 
 	        React.createElement(Head, {
+	          ref: "head", 
 	          click: this.handleClick, 
+	          resize: this.resize, 
+	          mouseMove: this.mouseMove, 
 	          columns: Object.keys(this.props.rows[0])}), 
-	        React.createElement(Body, {rows: this.props.rows, filter: "", order: this.state.order})
+	        React.createElement(Body, {
+	          rows: this.props.rows, 
+	          filter: this.props.filter, 
+	          order: this.state.order})
 	      )
 	    )
 	  },
 
-	  handleClick: function(e){
+	  handleClick: function(prop, e){
+	    if (!this.state.resizing)
+	      return this.setState({
+	        order: prop
+	      })
+	    var width = this.state._resize.scrollWidth + e.pageX - this.state._l
 	    this.setState({
-	      order: e.target.innerHTML
+	      resizing: false
+	    }, () => {
+	      this.state._resizeCol.className = 'column-resize'
+	      this.state._resize.style.width = width + 'px'
 	    })
+	  },
+
+	  resize: function(target, e){
+	    this.setState({
+	      _l: e.pageX
+	    , _resize: document.getElementById(target)
+	    , _resizeCol: e.target
+	    , resizing: !this.state.resizing
+	    })
+	    e.target.className = 'header-resize'
+	  },
+
+	  mouseMove: function(e){
+	    if (this.state.resizing)
+	      this.state._resizeCol.style.left = e.pageX - 2.5 + 'px'
 	  }
 
 	})
@@ -2501,8 +2546,8 @@
 
 	  render: function(){
 	    return (
-	      React.createElement("thead", null, 
-	        React.createElement(Header, {columns: this.props.columns, click: this.props.click})
+	      React.createElement("thead", {style: { cursor: 'pointer'}}, 
+	        React.createElement(Header, {ref: "header", columns: this.props.columns, click: this.props.click, resize: this.props.resize, mouseMove: this.props.mouseMove})
 	      )
 	    )
 	  }
@@ -2525,9 +2570,11 @@
 	   var columns = [React.createElement("td", {key: 'td.hash'}, "#")];
 	   for(var prop in props){
 	     var column = props[prop].charAt(0).toUpperCase() + props[prop].slice(1)
-	     columns.push(React.createElement("td", {key: 'td.' + prop, onClick: this.props.click}, column))
+	     columns.push(React.createElement("td", {key: 'td.' + prop, id: 'td.' + prop, onClick: this.props.click.bind(null, props[prop])}, column))
+	     columns.push(React.createElement("td", {key: 'td.resize.' + prop, className: "column-resize", onClick: this.props.resize.bind(null, 'td.' + prop)}))
 	   }
-	   return React.createElement("tr", null, columns);
+	   //columns.push(<td key="header-resize-column" className="header-resize" onClick={this.props.resize}></td>)
+	   return React.createElement("tr", {ref: "headerRow", onMouseMove: this.props.mouseMove}, columns);
 	 }
 	})
 
@@ -2543,6 +2590,21 @@
 
 	var Body = React.createClass({displayName: "Body",
 
+	  getInitialState: function(){
+	    return {
+	      reverse: false
+	    }
+	  },
+
+	  componentWillReceiveProps: function(props){
+
+	    if (props.order == this.props.order)
+	      this.setState({
+	        reverse: !this.state.reverse
+	      })
+
+	  },
+
 	  render: function(){
 	    return (
 	      React.createElement("tbody", null, 
@@ -2552,7 +2614,7 @@
 	  },
 
 	  _rows: function(props){
-	    return this.sort(props).map(function(row, i){
+	    return this.order(props).map(function(row, i){
 	      if (this.valid(row))
 	        return (
 	          React.createElement(Row, {key: i, index: i + 1, data: row})
@@ -2564,18 +2626,18 @@
 	    if (!this.props.filter)
 	      return true;
 	    for (var prop in row)
-	      if (row[prop].indexOf(this.props.filter) > -1)
+	      if (row[prop].toString().indexOf(this.props.filter) > -1)
 	        return true;
 	    return false;
 	  },
 
-	  sort: function(props){
+	  order: function(props){
 	    if (!props.order) return props.rows;
-	    var _rows = props.rows.sort(function(a, b){
+	    var rows = props.rows.sort(function(a, b){
 	      var sortProp = props.order.toLowerCase()
-	      return a[sortProp] > b[sortProp]
-	    })
-	    return _rows;
+	      return a[sortProp] > b[sortProp] ? 1 : -1;
+	    });
+	    return this.state.reverse ? rows.reverse() : rows;
 	  }
 
 	})
@@ -2599,6 +2661,7 @@
 	    var columns = [React.createElement("td", {key: 'td.index.'+Date()}, props.index)];
 	    for(var prop in props.data){
 	      columns.push(React.createElement("td", {key: props.index + '.' + prop}, props.data[prop]))
+	      columns.push(React.createElement("td", {key: props.index + '.td.resize.' + prop, className: "column-resize"}))
 	    }
 	    return React.createElement("tr", null, columns);
 	  }
