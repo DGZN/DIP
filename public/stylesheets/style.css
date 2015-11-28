@@ -32,7 +32,7 @@ body {
 }
 
 .column-resize {
-  width: 2px;
+  width: 4px;
   opacity: .5;
   background-color: none;
   border: 0px solid !important;
@@ -46,6 +46,12 @@ body {
 
 .column-resize:hover {
   width: 4px;
+  opacity: 1;
+}
+
+.no-hover:hover {
+  width: 2px;
+  cursor: pointer;
 }
 
 
@@ -287,12 +293,14 @@ body {
 
 .header-resize {
   position: absolute;
-  width: 5px;
+  width: 3px;
   left: 200px;
   background: rgba(0,0,0,1);
   opacity: .8;
-  height: 100%;
+  height: 38px;
   padding: 1px !important;
   border: 0px !important;
   display: table-column;
+  opacity: .7;
+  cursor: col-resize;
 }

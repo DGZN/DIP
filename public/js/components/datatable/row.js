@@ -7,11 +7,20 @@ var Row = React.createClass({
   },
 
   getRow: function(props){
-    var columns = [<td key={'td.index.'+Date()}>{props.index}</td>];
-    for(var prop in props.data){
-      columns.push(<td key={props.index + '.' + prop}>{props.data[prop]}</td>)
-      columns.push(<td key={props.index + '.td.resize.' + prop} className="column-resize"></td>)
-    }
+    var columns = [<td key={'td.index.'+Date()}>{props.index}</td>,
+     <td
+       key={'td.resize.index.'+Date()}
+       className="column-resize no-hover" >
+    </td>];
+    props.columns.keys.forEach(function(column){
+      var _column = props.data[column.toLowerCase()]
+      if (props.highlight.length >= 3){
+        var regex = new RegExp( '(' + props.highlight + ')', 'gi' );
+        _column = _column.toString().replace(regex, '<span class="highlighted">$1</span>');
+      }
+      columns.push(<td key={props.index + '.' + column} dangerouslySetInnerHTML={{ "__html": _column }} ></td>)
+      columns.push(<td key={props.index + '.td.resize.' + column} className="column-resize no-hover"></td>)
+    })
     return <tr>{columns}</tr>;
   }
 })

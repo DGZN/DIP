@@ -47,15 +47,17 @@
 	var React = __webpack_require__(1);
 	var ReactDOM = __webpack_require__(2);
 	var Faker = __webpack_require__(3);
-	var Input = ReactBootstrap.Input;
-
 	var NavBar = __webpack_require__(16);
 	var SlideMenu = __webpack_require__(17);
-	var DataTable = __webpack_require__(18);
+	var SearchBar = __webpack_require__(18);
+	var DataTable = __webpack_require__(19);
 
 	// var routes = [{
 	//   name: 'Oscars'
 	// , endpoint: 'http://api.opendev.oscars.org/v1/assets/films?!fields=last_watched,guid,slug,resume'
+	// , columns: {
+	//       ignore: ['poster']
+	//     }
 	// },{
 	//   name: 'Analytics'
 	// , endpoint: 'http://api.opendev.oscars.org/v1/analytics/traces'
@@ -66,7 +68,7 @@
 
 	function fakeRows(){
 	  var rows = []
-	  while(rows.length < 300)
+	  while(rows.length < 100)
 	    rows.push({
 	      id:    Faker.random.number(3)
 	    , name:  Faker.Name.findName()
@@ -83,29 +85,61 @@
 	  , endpoint: 'http://localhost:8000/v1/assets/series'
 	  , columns: {
 	      ignore:  ['seasons', 'meta']
-	    , include: ['meta.en.name as name']
-	    , headers: ['id', 'name']
+	    , order: ['ID', 'name', 'description']
+	    , alias: {
+	        name: 'meta.en.name'
+	      , description: 'meta.en.description'
+	      , year: 'production_year'
+	      , seasons: 'number_of_seasons'
+	      }
 	    }
 	  },{
 	    name: 'Seasons'
 	  , endpoint: 'http://localhost:8000/v1/assets/series/seasons'
 	  , columns: {
-	      ignore: ['meta', 'episodes']
+	      ignore: ['meta', 'has_trailer', 'episodes']
+	    , order: ['ID', 'description', 'thumb', 'year', 'episodes']
+	    , alias: {
+	        description: 'meta.en.description'
+	      , episodes: 'number_of_episodes'
+	      , year: 'production_year'
+	      }
 	    }
 	  },{
 	    name: 'Episodes'
 	  , endpoint: 'http://localhost:8000/v1/assets/series/seasons/episodes'
+	  , columns: {
+	      ignore: ['meta', 'songs']
+	    , order: ['ID', 'URL']
+	    , alias: {
+	        season: 'season_id'
+	      , series: 'series_id'
+	      , number: 'episode_number'
+	      , url: 'video_url'
+	      }
+	    }
 	  },{
 	    name: 'Albums'
 	  , endpoint: 'http://localhost:8000/v1/assets/albums'
 	  , columns: {
 	      ignore: ['meta', 'songs']
+	    , order: ['id', 'name']
+	    , alias: {
+	        name: 'meta.en.name'
+	      , songs: 'number_of_songs'
+	      }
 	    }
 	  },{
 	    name: 'Songs'
 	  , endpoint: 'http://localhost:8000/v1/assets/albums/songs'
 	  , columns: {
-	      ignore: ['']
+	      ignore: ['meta', 'has_video']
+	    , order: ['id', 'name', 'thumb', 'audio', 'video']
+	    , alias: {
+	        name: 'meta.en.name'
+	      , video: 'video_url'
+	      , audio: 'audio_url'
+	      }
 	    }
 	  },{
 	    name: 'Movies'
@@ -121,11 +155,13 @@
 	    }
 	}];
 
+
 	var App = React.createClass({displayName: "App",
 
 	  getInitialState: function(){
 	    return {
 	      filter: ''
+	    , selected: ''
 	    }
 	  },
 
@@ -136,8 +172,17 @@
 	        React.createElement("div", {className: "container-fluid"}, 
 	          React.createElement(SlideMenu, null), 
 	          React.createElement("div", {id: "left", className: "col-md-12"}, 
-	            React.createElement(Input, {type: "text", placeholder: "Search....", onChange: this.filter, value: this.state.filter, autoFocus: true}), 
-	            React.createElement(DataTable, {ref: "datatable", rows: fakeRows(), filter: this.state.filter})
+	            React.createElement(SearchBar, {
+	              onSelect: this.fetch, 
+	              onChange: this.filter, 
+	              routes: routes, 
+	              filter: this.state.filter, 
+	              selected: this.state.selected}), 
+	            React.createElement(DataTable, {
+	              ref: "datatable", 
+	              filter: this.state.filter, 
+	              head: this.state.selected, 
+	              rows: this.state.rows || fakeRows()})
 	          )
 	        )
 	      )
@@ -148,8 +193,19 @@
 	    this.setState({
 	      filter: e.target.value
 	    })
+	  },
+
+	  fetch: function(route){
+	    $.get(route.endpoint, function(result) {
+	      this.setState({
+	        rows: result
+	      , filter: ''
+	      , selected: route
+	    });
+	    }.bind(this));
 	  }
 	});
+
 	ReactDOM.render(
 	  React.createElement(App, null),
 	  document.getElementById('content')
@@ -2464,11 +2520,51 @@
 /* 18 */
 /***/ function(module, exports, __webpack_require__) {
 
+	var React = __webpack_require__(1),
+	 ReactDOM = __webpack_require__(2);
+
+	 var Input = ReactBootstrap.Input;
+	 var MenuItem = ReactBootstrap.MenuItem;
+	 var DropdownButton = ReactBootstrap.DropdownButton;
+	 var Glyphicon = ReactBootstrap.Glyphicon;
+
+	var SearchBar = React.createClass({displayName: "SearchBar",
+	  getInitialState: function() {
+	    return {
+	      route: ''
+	    }
+	  },
+	  render: function() {
+	    var _routes = []
+	    for (var i in this.props.routes) {
+	      var route = this.props.routes[i]
+	      _routes.push(React.createElement(MenuItem, {eventKey: i, key: i, onSelect: this.props.onSelect.bind(null, route)}, route.name))
+	    }
+	    return (
+	      React.createElement("div", {className: "row table-search"}, 
+	        React.createElement("div", {className: "data-table-search-panel"}, 
+	          React.createElement("input", {ref: "filterTextInput", type: "search", autoFocus: true, className: "data-table-search-input form-control input-lg", value: this.props.filter, onChange: this.props.onChange, placeholder: "Search...", "aria-describedby": "sizing-addon1"}), 
+	          React.createElement(DropdownButton, {title: this.props.selected.name || 'Routes', id: "bg-nested-dropdown", bsSize: "lg", className: "data-table-filter-dropdown"}, 
+	            _routes
+	          )
+	        )
+	      )
+	    );
+	  }
+	});
+
+	module.exports = SearchBar
+
+
+/***/ },
+/* 19 */
+/***/ function(module, exports, __webpack_require__) {
+
 	 var React = __webpack_require__(1),
 	  ReactDOM = __webpack_require__(2),
 	     Table = ReactBootstrap.Table,
-	      Head = __webpack_require__(19),
-	      Body = __webpack_require__(21);
+	      Head = __webpack_require__(20),
+	      Body = __webpack_require__(22);
 
 
 	var DataTable = React.createClass({displayName: "DataTable",
@@ -2480,18 +2576,25 @@
 	    }
 	  },
 
+	  componentWillReceiveProps: function(props){
+	    this.setState({ order: '' })
+	  },
+
 	  render: function(){
+	    var columns = this.columns(this.props),
+	      rows = this.rows(this.props);
 	    return (
 	      React.createElement(Table, {striped: true, bordered: true, hover: true}, 
 	        React.createElement(Head, {
 	          ref: "head", 
 	          click: this.handleClick, 
 	          resize: this.resize, 
-	          mouseMove: this.mouseMove, 
-	          columns: Object.keys(this.props.rows[0])}), 
+	          columns: columns, 
+	          mouseMove: this.mouseMove}), 
 	        React.createElement(Body, {
-	          rows: this.props.rows, 
+	          rows: rows, 
 	          filter: this.props.filter, 
+	          columns: columns, 
 	          order: this.state.order})
 	      )
 	    )
@@ -2512,31 +2615,123 @@
 	  },
 
 	  resize: function(target, e){
+	    if (this.state.resizing){
+	      var width = this.state._resize.scrollWidth + e.pageX - this.state._l
+	      this.setState({
+	        resizing: false
+	      }, () => {
+	        this.state._resizeCol.className = 'column-resize'
+	        this.state._resize.style.width = width + 'px'
+	      })
+	      document.getElementsByTagName('thead')[0].style.cursor = "pointer"
+	      return;
+	    }
 	    this.setState({
 	      _l: e.pageX
 	    , _resize: document.getElementById(target)
 	    , _resizeCol: e.target
-	    , resizing: !this.state.resizing
+	    , resizing: true
 	    })
+	    e.target.style.left = e.PageX  - 15 + 'px'
 	    e.target.className = 'header-resize'
+	    document.getElementsByTagName('thead')[0].style.cursor = "col-resize"
 	  },
 
 	  mouseMove: function(e){
 	    if (this.state.resizing)
-	      this.state._resizeCol.style.left = e.pageX - 2.5 + 'px'
+	      this.state._resizeCol.style.left = e.pageX - 15 + 'px'
+	  },
+
+	  columns: function(props){
+	    if (typeof props.head.columns == "undefined")
+	      return {
+	        keys: Object.keys(props.rows[0])
+	      }
+	    var columns = props.head.columns
+	    columns.keys = Object.keys(props.rows[0])
+	    if (columns.alias) {
+	      for(var alias in columns.alias){
+	        var match = inArray(columns.alias[alias], props.rows[0])
+	        if (typeof match != "undefined") {
+	          columns.keys.push(alias)
+	          if (lc(columns.keys).indexOf(columns.alias[alias]) > -1)
+	            columns.keys.splice(columns.keys.indexOf(columns.alias[alias]), 1)
+	        }
+	      }
+	    }
+	    if (columns.ignore) {
+	      columns.ignore.map((column) => {
+	        if (columns.keys.indexOf(column) > -1)
+	          columns.keys.splice(columns.keys.indexOf(column), 1)
+	      })
+	    }
+	    if (columns.order) {
+	      var order = columns.order
+	      columns.order.filter((key) => {
+	        if (columns.keys.indexOf(lc(key)) < 0) {
+	          order.splice(order.indexOf(key), 1)
+	        }
+	      })
+	      columns.keys.map((column) => {
+	        if (lc(order).indexOf(column) < 0) {
+	          order.push(column)
+	        }
+	      })
+	      columns.keys = columns.order
+	    }
+	    return columns;
+	  },
+
+	  rows: function(props){
+	    if (typeof props.head.columns == "undefined")
+	      return props.rows
+	    var columns = props.head.columns
+	    var _rows = props.rows.filter((row, i) => {
+	      if (columns.alias) {
+	        for(var alias in columns.alias){
+	          var match = inArray(columns.alias[alias], row)
+	          if (match !== 0) {
+	            row[alias] = match || ''
+	          }
+	        }
+	      }
+	      return row;
+	    })
+	    return _rows;
 	  }
 
 	})
+
+	function inArray(needle, haystack){
+	  if (haystack.hasOwnProperty(needle))
+	    return haystack[needle]
+	  var _needle = needle.split('.')
+	  if (_needle.length > 1) {
+	    _needle.map((key, i) => {
+	      if (haystack.hasOwnProperty(key))
+	        haystack = haystack[key]
+	    })
+	    if (typeof haystack != "object") {
+	      return haystack;
+	    }
+	  }
+	  return 0;
+	}
+
+	function lc(s){
+	  return s.toString().toLowerCase();
+	}
+
 
 	module.exports = DataTable;
 
 
 /***/ },
-/* 19 */
+/* 20 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var React = __webpack_require__(1),
-	   Header = __webpack_require__(20);
+	   Header = __webpack_require__(21);
 
 	var Head = React.createClass({displayName: "Head",
 
@@ -2557,7 +2752,7 @@
 
 
 /***/ },
-/* 20 */
+/* 21 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var React = __webpack_require__(1);
@@ -2566,15 +2761,19 @@
 	 render: function(){
 	   return this.getHeaderRow(this.props.columns);
 	 },
-	 getHeaderRow: function(props){
-	   var columns = [React.createElement("td", {key: 'td.hash'}, "#")];
-	   for(var prop in props){
-	     var column = props[prop].charAt(0).toUpperCase() + props[prop].slice(1)
-	     columns.push(React.createElement("td", {key: 'td.' + prop, id: 'td.' + prop, onClick: this.props.click.bind(null, props[prop])}, column))
-	     columns.push(React.createElement("td", {key: 'td.resize.' + prop, className: "column-resize", onClick: this.props.resize.bind(null, 'td.' + prop)}))
+	 getHeaderRow: function(columns){
+	   var _columns = [React.createElement("td", {key: 'td.hash', id: "td.hash"}, "#"),
+	    React.createElement("td", {
+	      key: 'td.resize.hash', 
+	      className: "column-resize", 
+	      onClick: this.props.resize.bind(null, 'td.hash')}
+	   )];
+	   for(var key in columns.keys){
+	     var column = columns.keys[key].charAt(0).toUpperCase() + columns.keys[key].slice(1)
+	     _columns.push(React.createElement("td", {key: 'td.' + key, id: 'td.' + key, onClick: this.props.click.bind(null, columns.keys[key])}, column))
+	     _columns.push(React.createElement("td", {key: 'td.resize.' + key, className: "column-resize", onClick: this.props.resize.bind(null, 'td.' + key)}))
 	   }
-	   //columns.push(<td key="header-resize-column" className="header-resize" onClick={this.props.resize}></td>)
-	   return React.createElement("tr", {ref: "headerRow", onMouseMove: this.props.mouseMove}, columns);
+	   return React.createElement("tr", {ref: "headerRow", onMouseMove: this.props.mouseMove}, _columns);
 	 }
 	})
 
@@ -2582,11 +2781,11 @@
 
 
 /***/ },
-/* 21 */
+/* 22 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var React = __webpack_require__(1),
-	      Row = __webpack_require__(22);
+	      Row = __webpack_require__(23);
 
 	var Body = React.createClass({displayName: "Body",
 
@@ -2597,12 +2796,11 @@
 	  },
 
 	  componentWillReceiveProps: function(props){
-
+	    var state = { order: props.order }
 	    if (props.order == this.props.order)
-	      this.setState({
-	        reverse: !this.state.reverse
-	      })
+	      state.reverse = !this.state.reverse
 
+	    this.setState(state)
 	  },
 
 	  render: function(){
@@ -2617,7 +2815,12 @@
 	    return this.order(props).map(function(row, i){
 	      if (this.valid(row))
 	        return (
-	          React.createElement(Row, {key: i, index: i + 1, data: row})
+	          React.createElement(Row, {
+	            key: i, 
+	            index: i + 1, 
+	            columns: props.columns, 
+	            data: row, 
+	            highlight: this.props.filter})
 	        )
 	    }.bind(this))
 	  },
@@ -2626,7 +2829,7 @@
 	    if (!this.props.filter)
 	      return true;
 	    for (var prop in row)
-	      if (row[prop].toString().indexOf(this.props.filter) > -1)
+	      if (lc(row[prop]).indexOf(lc(this.props.filter)) > -1)
 	        return true;
 	    return false;
 	  },
@@ -2635,6 +2838,10 @@
 	    if (!props.order) return props.rows;
 	    var rows = props.rows.sort(function(a, b){
 	      var sortProp = props.order.toLowerCase()
+	      if (typeof a[sortProp] == "undefined") {
+	        console.log("Undefined", a);
+	        return -1
+	      }
 	      return a[sortProp] > b[sortProp] ? 1 : -1;
 	    });
 	    return this.state.reverse ? rows.reverse() : rows;
@@ -2642,11 +2849,15 @@
 
 	})
 
+	function lc(s){
+	  return s.toString().toLowerCase();
+	}
+
 	module.exports = Body;
 
 
 /***/ },
-/* 22 */
+/* 23 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var React = __webpack_require__(1);
@@ -2658,11 +2869,20 @@
 	  },
 
 	  getRow: function(props){
-	    var columns = [React.createElement("td", {key: 'td.index.'+Date()}, props.index)];
-	    for(var prop in props.data){
-	      columns.push(React.createElement("td", {key: props.index + '.' + prop}, props.data[prop]))
-	      columns.push(React.createElement("td", {key: props.index + '.td.resize.' + prop, className: "column-resize"}))
-	    }
+	    var columns = [React.createElement("td", {key: 'td.index.'+Date()}, props.index),
+	     React.createElement("td", {
+	       key: 'td.resize.index.'+Date(), 
+	       className: "column-resize no-hover"}
+	    )];
+	    props.columns.keys.forEach(function(column){
+	      var _column = props.data[column.toLowerCase()]
+	      if (props.highlight.length >= 3){
+	        var regex = new RegExp( '(' + props.highlight + ')', 'gi' );
+	        _column = _column.toString().replace(regex, '<span class="highlighted">$1</span>');
+	      }
+	      columns.push(React.createElement("td", {key: props.index + '.' + column, dangerouslySetInnerHTML: { "__html": _column}}))
+	      columns.push(React.createElement("td", {key: props.index + '.td.resize.' + column, className: "column-resize no-hover"}))
+	    })
 	    return React.createElement("tr", null, columns);
 	  }
 	})

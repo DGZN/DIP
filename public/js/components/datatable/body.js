@@ -10,12 +10,11 @@ var Body = React.createClass({
   },
 
   componentWillReceiveProps: function(props){
-
+    var state = { order: props.order }
     if (props.order == this.props.order)
-      this.setState({
-        reverse: !this.state.reverse
-      })
+      state.reverse = !this.state.reverse
 
+    this.setState(state)
   },
 
   render: function(){
@@ -30,7 +29,12 @@ var Body = React.createClass({
     return this.order(props).map(function(row, i){
       if (this.valid(row))
         return (
-          <Row key={i} index={i + 1} data={row} />
+          <Row
+            key={i}
+            index={i + 1}
+            columns={props.columns}
+            data={row}
+            highlight={this.props.filter} />
         )
     }.bind(this))
   },
@@ -39,7 +43,7 @@ var Body = React.createClass({
     if (!this.props.filter)
       return true;
     for (var prop in row)
-      if (row[prop].toString().indexOf(this.props.filter) > -1)
+      if (lc(row[prop]).indexOf(lc(this.props.filter)) > -1)
         return true;
     return false;
   },
@@ -48,11 +52,19 @@ var Body = React.createClass({
     if (!props.order) return props.rows;
     var rows = props.rows.sort(function(a, b){
       var sortProp = props.order.toLowerCase()
+      if (typeof a[sortProp] == "undefined") {
+        console.log("Undefined", a);
+        return -1
+      }
       return a[sortProp] > b[sortProp] ? 1 : -1;
     });
     return this.state.reverse ? rows.reverse() : rows;
   }
 
 })
+
+function lc(s){
+  return s.toString().toLowerCase();
+}
 
 module.exports = Body;
