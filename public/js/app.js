@@ -34,6 +34,16 @@ function fakeRows(){
   return rows;
 }
 
+var options = {
+  default: {
+    language: 'en'
+  }
+, language: {
+    english: 'en'
+  , arabic:  'ar'
+  }
+}
+
 var routes = [{
     name: 'Series'
   , endpoint: 'http://localhost:8000/v1/assets/series'
@@ -41,8 +51,8 @@ var routes = [{
       ignore:  ['seasons', 'meta']
     , order: ['ID', 'name', 'description']
     , alias: {
-        name: 'meta.en.name'
-      , description: 'meta.en.description'
+        name: 'meta.language.name'
+      , description: 'meta.language.description'
       , year: 'production_year'
       , seasons: 'number_of_seasons'
       }
@@ -54,7 +64,7 @@ var routes = [{
       ignore: ['meta', 'has_trailer', 'episodes']
     , order: ['ID', 'description', 'thumb', 'year', 'episodes']
     , alias: {
-        description: 'meta.en.description'
+        description: 'meta.language.description'
       , episodes: 'number_of_episodes'
       , year: 'production_year'
       }
@@ -77,9 +87,9 @@ var routes = [{
   , endpoint: 'http://localhost:8000/v1/assets/albums'
   , columns: {
       ignore: ['meta', 'songs']
-    , order: ['id', 'name']
+    , order: ['ID', 'name']
     , alias: {
-        name: 'meta.en.name'
+        name: 'meta.language.name'
       , songs: 'number_of_songs'
       }
     }
@@ -88,34 +98,48 @@ var routes = [{
   , endpoint: 'http://localhost:8000/v1/assets/albums/songs'
   , columns: {
       ignore: ['meta', 'has_video']
-    , order: ['id', 'name', 'thumb', 'audio', 'video']
+    , order: ['ID', 'name', 'thumb', 'audio', 'video']
     , alias: {
-        name: 'meta.en.name'
+        name: 'meta.language.name'
       , video: 'video_url'
       , audio: 'audio_url'
+      , number: 'song_number'
       }
     }
   },{
     name: 'Movies'
   , endpoint: 'http://localhost:8000/v1/assets/movies'
   , columns: {
-      ignore: ['meta']
+      ignore: ['meta', 'has_trailer']
+    , order: ['ID', 'name']
+    , alias: {
+        name: 'meta.language.name'
+      , video: 'video_url'
+      }
     }
   },{
     name: 'Plays'
   , endpoint: 'http://localhost:8000/v1/assets/plays'
   , columns: {
-      ignore: ['plays']
+      ignore: ['meta', 'has_trailer']
+    , order: ['ID', 'name', 'description', 'year', 'url']
+    , alias: {
+      name: 'meta.language.name'
+    , description: 'meta.language.description'
+    , year: 'production_year'
+    , URL: 'video_url'
+    }
     }
 }];
-
 
 var App = React.createClass({
 
   getInitialState: function(){
     return {
       filter: ''
+    , language: 'en'
     , selected: ''
+    , option: ''
     }
   },
 
@@ -127,14 +151,16 @@ var App = React.createClass({
           <SlideMenu />
           <div id="left" className="col-md-12">
             <SearchBar
-              onSelect={this.fetch}
+              onSelect={this.select}
               onChange={this.filter}
               routes={routes}
               filter={this.state.filter}
+              _select={this.state._select || ''}
               selected={this.state.selected} />
             <DataTable
               ref="datatable"
               filter={this.state.filter}
+              option={this.state.option}
               head={this.state.selected}
               rows={this.state.rows || fakeRows()} />
           </div>
@@ -144,13 +170,21 @@ var App = React.createClass({
   },
 
   filter: function(e){
+    this.setState({filter: e.target.value})
+  },
+
+  select: function(target, e){
+    if (target.type == "route")
+      return this.fetch(target[target.type])
     this.setState({
-      filter: e.target.value
+      [target.type]: target[target.type]
+    , _select: target[target.type][Object.keys(target[target.type])[0]]
     })
   },
 
   fetch: function(route){
     $.get(route.endpoint, function(result) {
+      route.options = options
       this.setState({
         rows: result
       , filter: ''

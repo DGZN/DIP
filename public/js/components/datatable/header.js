@@ -4,6 +4,7 @@ var Header = React.createClass({
  render: function(){
    return this.getHeaderRow(this.props.columns);
  },
+
  getHeaderRow: function(columns){
    var _columns = [<td key={'td.hash'} id="td.hash">#</td>,
     <td

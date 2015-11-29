@@ -80,6 +80,16 @@
 	  return rows;
 	}
 
+	var options = {
+	  default: {
+	    language: 'en'
+	  }
+	, language: {
+	    english: 'en'
+	  , arabic:  'ar'
+	  }
+	}
+
 	var routes = [{
 	    name: 'Series'
 	  , endpoint: 'http://localhost:8000/v1/assets/series'
@@ -87,8 +97,8 @@
 	      ignore:  ['seasons', 'meta']
 	    , order: ['ID', 'name', 'description']
 	    , alias: {
-	        name: 'meta.en.name'
-	      , description: 'meta.en.description'
+	        name: 'meta.language.name'
+	      , description: 'meta.language.description'
 	      , year: 'production_year'
 	      , seasons: 'number_of_seasons'
 	      }
@@ -100,7 +110,7 @@
 	      ignore: ['meta', 'has_trailer', 'episodes']
 	    , order: ['ID', 'description', 'thumb', 'year', 'episodes']
 	    , alias: {
-	        description: 'meta.en.description'
+	        description: 'meta.language.description'
 	      , episodes: 'number_of_episodes'
 	      , year: 'production_year'
 	      }
@@ -123,9 +133,9 @@
 	  , endpoint: 'http://localhost:8000/v1/assets/albums'
 	  , columns: {
 	      ignore: ['meta', 'songs']
-	    , order: ['id', 'name']
+	    , order: ['ID', 'name']
 	    , alias: {
-	        name: 'meta.en.name'
+	        name: 'meta.language.name'
 	      , songs: 'number_of_songs'
 	      }
 	    }
@@ -134,34 +144,48 @@
 	  , endpoint: 'http://localhost:8000/v1/assets/albums/songs'
 	  , columns: {
 	      ignore: ['meta', 'has_video']
-	    , order: ['id', 'name', 'thumb', 'audio', 'video']
+	    , order: ['ID', 'name', 'thumb', 'audio', 'video']
 	    , alias: {
-	        name: 'meta.en.name'
+	        name: 'meta.language.name'
 	      , video: 'video_url'
 	      , audio: 'audio_url'
+	      , number: 'song_number'
 	      }
 	    }
 	  },{
 	    name: 'Movies'
 	  , endpoint: 'http://localhost:8000/v1/assets/movies'
 	  , columns: {
-	      ignore: ['meta']
+	      ignore: ['meta', 'has_trailer']
+	    , order: ['ID', 'name']
+	    , alias: {
+	        name: 'meta.language.name'
+	      , video: 'video_url'
+	      }
 	    }
 	  },{
 	    name: 'Plays'
 	  , endpoint: 'http://localhost:8000/v1/assets/plays'
 	  , columns: {
-	      ignore: ['plays']
+	      ignore: ['meta', 'has_trailer']
+	    , order: ['ID', 'name', 'description', 'year', 'url']
+	    , alias: {
+	      name: 'meta.language.name'
+	    , description: 'meta.language.description'
+	    , year: 'production_year'
+	    , URL: 'video_url'
+	    }
 	    }
 	}];
-
 
 	var App = React.createClass({displayName: "App",
 
 	  getInitialState: function(){
 	    return {
 	      filter: ''
+	    , language: 'en'
 	    , selected: ''
+	    , option: ''
 	    }
 	  },
 
@@ -173,14 +197,16 @@
 	          React.createElement(SlideMenu, null), 
 	          React.createElement("div", {id: "left", className: "col-md-12"}, 
 	            React.createElement(SearchBar, {
-	              onSelect: this.fetch, 
+	              onSelect: this.select, 
 	              onChange: this.filter, 
 	              routes: routes, 
 	              filter: this.state.filter, 
+	              _select: this.state._select || '', 
 	              selected: this.state.selected}), 
 	            React.createElement(DataTable, {
 	              ref: "datatable", 
 	              filter: this.state.filter, 
+	              option: this.state.option, 
 	              head: this.state.selected, 
 	              rows: this.state.rows || fakeRows()})
 	          )
@@ -190,13 +216,21 @@
 	  },
 
 	  filter: function(e){
+	    this.setState({filter: e.target.value})
+	  },
+
+	  select: function(target, e){
+	    if (target.type == "route")
+	      return this.fetch(target[target.type])
 	    this.setState({
-	      filter: e.target.value
+	      [target.type]: target[target.type]
+	    , _select: target[target.type][Object.keys(target[target.type])[0]]
 	    })
 	  },
 
 	  fetch: function(route){
 	    $.get(route.endpoint, function(result) {
+	      route.options = options
 	      this.setState({
 	        rows: result
 	      , filter: ''
@@ -2538,7 +2572,26 @@
 	    var _routes = []
 	    for (var i in this.props.routes) {
 	      var route = this.props.routes[i]
-	      _routes.push(React.createElement(MenuItem, {eventKey: i, key: i, onSelect: this.props.onSelect.bind(null, route)}, route.name))
+	      _routes.push(React.createElement(MenuItem, {eventKey: i, key: i, onSelect: this.props.onSelect.bind(null, { type: 'route', route: route })}, route.name))
+	    }
+	    if (this.props.selected.options) {
+	      var options = this.props.selected.options
+	      var _options = []
+	      for(var option in options){
+	        if (option == 'default') continue;
+	        if (options.default.hasOwnProperty(option))
+	          var title = this.props._select.length ? this.props._select : options.default[option]
+	        if (typeof options[option] == "object")
+	          for (var i in options[option]){
+	            if (_options.length < 1)
+	              var title = title || options[option][i]
+	            _options.push(React.createElement(MenuItem, {eventKey: i, key: i, onSelect: this.props.onSelect.bind(null, { type: 'option', option: { [option]: options[option][i] } })}, uc(options[option][i])))
+	          }
+	        var optionsDropDown = (
+	          React.createElement(DropdownButton, {title: uc(title), id: "bg-nested-options-dropdown", bsSize: "md", className: "data-table-options-dropdown"}, 
+	            _options
+	          ))
+	      }
 	    }
 	    return (
 	      React.createElement("div", {className: "row table-search"}, 
@@ -2546,12 +2599,17 @@
 	          React.createElement("input", {ref: "filterTextInput", type: "search", autoFocus: true, className: "data-table-search-input form-control input-lg", value: this.props.filter, onChange: this.props.onChange, placeholder: "Search...", "aria-describedby": "sizing-addon1"}), 
 	          React.createElement(DropdownButton, {title: this.props.selected.name || 'Routes', id: "bg-nested-dropdown", bsSize: "lg", className: "data-table-filter-dropdown"}, 
 	            _routes
-	          )
+	          ), 
+	          optionsDropDown
 	        )
 	      )
 	    );
 	  }
 	});
+
+	function uc(s){
+	  return s.charAt(0).toUpperCase() + s.slice(1);
+	}
 
 	module.exports = SearchBar
 
@@ -2586,7 +2644,6 @@
 	    return (
 	      React.createElement(Table, {striped: true, bordered: true, hover: true}, 
 	        React.createElement(Head, {
-	          ref: "head", 
 	          click: this.handleClick, 
 	          resize: this.resize, 
 	          columns: columns, 
@@ -2651,8 +2708,9 @@
 	    columns.keys = Object.keys(props.rows[0])
 	    if (columns.alias) {
 	      for(var alias in columns.alias){
-	        var match = inArray(columns.alias[alias], props.rows[0])
-	        if (typeof match != "undefined") {
+	        var _alias = this._alias(alias, props.head)
+	        var match = inArray(_alias, props.rows[0])
+	        if (typeof match != "undefined" && typeof match != "object") {
 	          columns.keys.push(alias)
 	          if (lc(columns.keys).indexOf(columns.alias[alias]) > -1)
 	            columns.keys.splice(columns.keys.indexOf(columns.alias[alias]), 1)
@@ -2689,7 +2747,8 @@
 	    var _rows = props.rows.filter((row, i) => {
 	      if (columns.alias) {
 	        for(var alias in columns.alias){
-	          var match = inArray(columns.alias[alias], row)
+	          var _alias = this._alias(alias, props.head)
+	          var match = inArray(_alias, row)
 	          if (match !== 0) {
 	            row[alias] = match || ''
 	          }
@@ -2698,6 +2757,22 @@
 	      return row;
 	    })
 	    return _rows;
+	  },
+
+	  _alias: function(alias, props){
+	    if (this.props.option) {
+	      for(var prop in this.props.option)
+	        props.options.default[prop] = this.props.option[prop]
+	    }
+	    var match = inArray('options.default', props)
+	    if (match !== 0){
+	      var key = Object.keys(match)[0]
+	      var value = match[Object.keys(match)[0]]
+	      var _alias = props.columns.alias[alias],
+	      _alias = _alias.replace(key, value)
+	      return _alias;
+	    }
+	    return alias;
 	  }
 
 	})
@@ -2707,19 +2782,26 @@
 	    return haystack[needle]
 	  var _needle = needle.split('.')
 	  if (_needle.length > 1) {
-	    _needle.map((key, i) => {
-	      if (haystack.hasOwnProperty(key))
+	    var match = _needle.map((key, i) => {
+	      if (haystack.hasOwnProperty(key)){
 	        haystack = haystack[key]
+	        return true;
+	      }
+	      return false;
 	    })
-	    if (typeof haystack != "object") {
+	    if (match)
 	      return haystack;
-	    }
 	  }
 	  return 0;
 	}
 
+
 	function lc(s){
 	  return s.toString().toLowerCase();
+	}
+
+	function has(needle, haystack){
+	  console.log("Looking for ", needle, 'in', haystack);
 	}
 
 
@@ -2734,11 +2816,6 @@
 	   Header = __webpack_require__(21);
 
 	var Head = React.createClass({displayName: "Head",
-
-	  getInitialState: function(){
-	    return {}
-	  },
-
 	  render: function(){
 	    return (
 	      React.createElement("thead", {style: { cursor: 'pointer'}}, 
@@ -2761,6 +2838,7 @@
 	 render: function(){
 	   return this.getHeaderRow(this.props.columns);
 	 },
+
 	 getHeaderRow: function(columns){
 	   var _columns = [React.createElement("td", {key: 'td.hash', id: "td.hash"}, "#"),
 	    React.createElement("td", {
@@ -2799,7 +2877,6 @@
 	    var state = { order: props.order }
 	    if (props.order == this.props.order)
 	      state.reverse = !this.state.reverse
-
 	    this.setState(state)
 	  },
 
@@ -2838,10 +2915,6 @@
 	    if (!props.order) return props.rows;
 	    var rows = props.rows.sort(function(a, b){
 	      var sortProp = props.order.toLowerCase()
-	      if (typeof a[sortProp] == "undefined") {
-	        console.log("Undefined", a);
-	        return -1
-	      }
 	      return a[sortProp] > b[sortProp] ? 1 : -1;
 	    });
 	    return this.state.reverse ? rows.reverse() : rows;

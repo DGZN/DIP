@@ -24,7 +24,6 @@ var DataTable = React.createClass({
     return (
       <Table striped bordered hover>
         <Head
-          ref="head"
           click={this.handleClick}
           resize={this.resize}
           columns={columns}
@@ -89,8 +88,9 @@ var DataTable = React.createClass({
     columns.keys = Object.keys(props.rows[0])
     if (columns.alias) {
       for(var alias in columns.alias){
-        var match = inArray(columns.alias[alias], props.rows[0])
-        if (typeof match != "undefined") {
+        var _alias = this._alias(alias, props.head)
+        var match = inArray(_alias, props.rows[0])
+        if (typeof match != "undefined" && typeof match != "object") {
           columns.keys.push(alias)
           if (lc(columns.keys).indexOf(columns.alias[alias]) > -1)
             columns.keys.splice(columns.keys.indexOf(columns.alias[alias]), 1)
@@ -127,7 +127,8 @@ var DataTable = React.createClass({
     var _rows = props.rows.filter((row, i) => {
       if (columns.alias) {
         for(var alias in columns.alias){
-          var match = inArray(columns.alias[alias], row)
+          var _alias = this._alias(alias, props.head)
+          var match = inArray(_alias, row)
           if (match !== 0) {
             row[alias] = match || ''
           }
@@ -136,6 +137,22 @@ var DataTable = React.createClass({
       return row;
     })
     return _rows;
+  },
+
+  _alias: function(alias, props){
+    if (this.props.option) {
+      for(var prop in this.props.option)
+        props.options.default[prop] = this.props.option[prop]
+    }
+    var match = inArray('options.default', props)
+    if (match !== 0){
+      var key = Object.keys(match)[0]
+      var value = match[Object.keys(match)[0]]
+      var _alias = props.columns.alias[alias],
+      _alias = _alias.replace(key, value)
+      return _alias;
+    }
+    return alias;
   }
 
 })
@@ -145,19 +162,26 @@ function inArray(needle, haystack){
     return haystack[needle]
   var _needle = needle.split('.')
   if (_needle.length > 1) {
-    _needle.map((key, i) => {
-      if (haystack.hasOwnProperty(key))
+    var match = _needle.map((key, i) => {
+      if (haystack.hasOwnProperty(key)){
         haystack = haystack[key]
+        return true;
+      }
+      return false;
     })
-    if (typeof haystack != "object") {
+    if (match)
       return haystack;
-    }
   }
   return 0;
 }
 
+
 function lc(s){
   return s.toString().toLowerCase();
+}
+
+function has(needle, haystack){
+  console.log("Looking for ", needle, 'in', haystack);
 }
 
 

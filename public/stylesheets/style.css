@@ -78,12 +78,27 @@ body {
 
 .data-table-filter-dropdown {
   position: absolute;
-  right: 25px;
+  right: 12px;
   float: right;
   font-size: 15px !important;
   color: rgba(0,0,0,.5);
   margin: 2px 2px 2px 1px;
   border: none !important;
+}
+
+.data-table-options-dropdown {
+  position: absolute;
+  right: 57px;
+  min-width: 45px;
+  float: right !important;
+  font-size: 15px !important;
+  color: rgba(0,0,0,.5);
+  margin: 3px 5px 2px 1px;
+  border: none !important;
+}
+
+.data-table-options-dropdown .dropdown-menu {
+  left: -56px !important;
 }
 
 .data-table-settings {

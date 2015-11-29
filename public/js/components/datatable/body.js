@@ -13,7 +13,6 @@ var Body = React.createClass({
     var state = { order: props.order }
     if (props.order == this.props.order)
       state.reverse = !this.state.reverse
-
     this.setState(state)
   },
 
@@ -52,10 +51,6 @@ var Body = React.createClass({
     if (!props.order) return props.rows;
     var rows = props.rows.sort(function(a, b){
       var sortProp = props.order.toLowerCase()
-      if (typeof a[sortProp] == "undefined") {
-        console.log("Undefined", a);
-        return -1
-      }
       return a[sortProp] > b[sortProp] ? 1 : -1;
     });
     return this.state.reverse ? rows.reverse() : rows;

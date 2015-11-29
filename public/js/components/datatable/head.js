@@ -2,11 +2,6 @@ var React = require('react'),
    Header = require('./header');
 
 var Head = React.createClass({
-
-  getInitialState: function(){
-    return {}
-  },
-
   render: function(){
     return (
       <thead style={{ cursor: 'pointer' }}>
