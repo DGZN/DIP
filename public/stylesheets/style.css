@@ -84,17 +84,19 @@ body {
   color: rgba(0,0,0,.5);
   margin: 2px 2px 2px 1px;
   border: none !important;
+  z-index: 999999;
 }
 
 .data-table-options-dropdown {
   position: absolute;
-  right: 57px;
+  right: 65px;
   min-width: 45px;
   float: right !important;
   font-size: 15px !important;
   color: rgba(0,0,0,.5);
   margin: 3px 5px 2px 1px;
   border: none !important;
+  z-index: 99999;
 }
 
 .data-table-options-dropdown .dropdown-menu {
