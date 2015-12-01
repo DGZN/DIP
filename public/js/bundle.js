@@ -47,30 +47,18 @@
 	var React = __webpack_require__(1);
 	var ReactDOM = __webpack_require__(2);
 	var Faker = __webpack_require__(3);
-	var NavBar = __webpack_require__(16);
-	var SlideMenu = __webpack_require__(17);
-	var SearchBar = __webpack_require__(18);
-	var DataTable = __webpack_require__(19);
+	var Consume = __webpack_require__(16);
+	var NavBar = __webpack_require__(17);
+	var SlideMenu = __webpack_require__(18);
+	var SearchBar = __webpack_require__(19);
+	var DataTable = __webpack_require__(20);
 
-	// var routes = [{
-	//   name: 'Oscars'
-	// , endpoint: 'http://api.opendev.oscars.org/v1/assets/films?!fields=last_watched,guid,slug,resume'
-	// , columns: {
-	//       ignore: ['poster']
-	//     }
-	// },{
-	//   name: 'Analytics'
-	// , endpoint: 'http://api.opendev.oscars.org/v1/analytics/traces'
-	// , columns: {
-	//     ignore: ['name', 'type', 'os', 'browser', 'language', 'events']
-	//   }
-	// }];
 
 	function fakeRows(){
 	  var rows = []
-	  while(rows.length < 100)
+	  while(rows.length < 1000)
 	    rows.push({
-	      id:    Faker.random.number(3)
+	      id:    Faker.random.number(999)
 	    , name:  Faker.Name.findName()
 	    , email: Faker.Internet.email()
 	    , city:  Faker.Address.city()
@@ -91,6 +79,12 @@
 	}
 
 	var routes = [{
+	    name: 'AMPAS'
+	  , endpoint: 'http://api.opendev.oscars.org/v1/assets/films'
+	  , columns: {
+	      ignore:  ['poster', 'resume', 'last_watched']
+	    }
+	  },{
 	    name: 'Series'
 	  , endpoint: 'http://localhost:8000/v1/assets/series'
 	  , columns: {
@@ -178,7 +172,31 @@
 	    }
 	}];
 
+	// <SearchBar
+	//   onSelect={this.select}
+	//   onChange={this.filter}
+	//   routes={routes}
+	//   filter={this.state.filter}
+	//   _select={this.state._select || ''}
+	//   selected={this.state.selected} />
+	// <DataTable
+	//   filter={this.state.filter}
+	//   option={this.state.option}
+	//   data={this.state.data || Consume(fakeRows())} />
+
 	var App = React.createClass({displayName: "App",
+
+	  componentWillMount: function(){
+	    getData(routes, (err, data) => {
+	      if (err)
+	        throw new Error('Error getting data', err)
+	      this.setState({
+	        rows: data
+	      }, () => {
+	        console.log("")
+	      })
+	    }).bind(this)
+	  },
 
 	  getInitialState: function(){
 	    return {
@@ -194,7 +212,6 @@
 	      React.createElement("div", null, 
 	        React.createElement(NavBar, null), 
 	        React.createElement("div", {className: "container-fluid"}, 
-	          React.createElement(SlideMenu, null), 
 	          React.createElement("div", {id: "left", className: "col-md-12"}, 
 	            React.createElement(SearchBar, {
 	              onSelect: this.select, 
@@ -204,11 +221,9 @@
 	              _select: this.state._select || '', 
 	              selected: this.state.selected}), 
 	            React.createElement(DataTable, {
-	              ref: "datatable", 
 	              filter: this.state.filter, 
 	              option: this.state.option, 
-	              head: this.state.selected, 
-	              rows: this.state.rows || fakeRows()})
+	              data: this.state.rows || fakeRows()})
 	          )
 	        )
 	      )
@@ -231,19 +246,36 @@
 	  fetch: function(route){
 	    $.get(route.endpoint, function(result) {
 	      route.options = options
-	      this.setState({
-	        rows: result
-	      , filter: ''
-	      , selected: route
-	    });
+
+	      // this.setState({
+	      //   rows: result
+	      // , filter: ''
+	      // , selected: route
+	      // });
 	    }.bind(this));
 	  }
+
 	});
 
 	ReactDOM.render(
 	  React.createElement(App, null),
 	  document.getElementById('content')
 	);
+
+	function getData(routes, cb){
+	  if (!routes[0].hasOwnProperty('endpoint'))
+	    return false;
+	  var data = $.get(routes[0].endpoint)
+	  data.done((data) => {
+	    cb(null, data)
+	  }).error(function(err){
+	    cb(err)
+	  })
+	}
+
+	function map(data){
+	  console.log("mapping data", data)
+	}
 
 
 /***/ },
@@ -2452,6 +2484,143 @@
 /* 16 */
 /***/ function(module, exports) {
 
+	
+	var Consume = function(route, options, cb){
+	  if (!(this instanceof Consume))
+	    return new Consume(route, options, cb)
+	  var options = options      || {}
+	    , route   = parse(route, cb) || {};
+
+	  function parse(route){
+	    if (!route.hasOwnProperty('endpoint'))
+	      return {
+	        columns: columns(route, route)
+	      , rows: rows(route, route)
+	      }
+	    return fetch(route, cb);
+	  }
+
+	  function fetch(route, cb){
+	    $.get(route.endpoint).done(function(xhr){
+	      route.columns = columns(route, xhr)
+	    , route.rows = rows(route, xhr);
+	      cb(route)
+	    })
+	  }
+
+	  function columns(route, data){
+	    if (typeof route.columns == "undefined")
+	      return {
+	        keys: Object.keys(data[0])
+	      }
+	    var columns = route.columns
+	    columns.keys = Object.keys(data[0])
+	    if (columns.alias) {
+	      for(var alias in columns.alias){
+	        var _alias = this._alias(alias, route)
+	        var match = inArray(_alias, data[0])
+	        if (typeof match != "undefined" && typeof match != "object") {
+	          columns.keys.push(alias)
+	          if (lc(columns.keys).indexOf(columns.alias[alias]) > -1)
+	            columns.keys.splice(columns.keys.indexOf(columns.alias[alias]), 1)
+	        }
+	      }
+	    }
+	    if (columns.ignore) {
+	      columns.ignore.map((column) => {
+	        if (columns.keys.indexOf(column) > -1)
+	          columns.keys.splice(columns.keys.indexOf(column), 1)
+	      })
+	    }
+	    if (columns.order) {
+	      var order = columns.order
+	      columns.order.filter((key) => {
+	        if (columns.keys.indexOf(lc(key)) < 0) {
+	          order.splice(order.indexOf(key), 1)
+	        }
+	      })
+	      columns.keys.map((column) => {
+	        if (lc(order).indexOf(column) < 0) {
+	          order.push(column)
+	        }
+	      })
+	      columns.keys = columns.order
+	    }
+	    return columns;
+	  }
+
+	  function rows(route, data){
+	    if (typeof route.columns == "undefined")
+	      return data
+	    var columns = route.columns
+	    var _rows = data.filter((row, i) => {
+	      if (columns.ignore) {
+	        for (var key in row) {
+	          if (columns.ignore.indexOf(key) > -1)
+	            delete row[key]
+	        }
+	      }
+	      if (columns.alias) {
+	        for(var alias in columns.alias){
+	          var _alias = this._alias(alias, route)
+	          var match = inArray(_alias, row)
+	          if (match !== 0) {
+	            row[alias] = match || ''
+	          }
+	        }
+	      }
+	      return row;
+	    })
+	    return _rows;
+	  }
+
+	  function alias(alias, props){
+	    if (this.props.option) {
+	      for(var prop in this.props.option)
+	        props.options.default[prop] = this.props.option[prop]
+	    }
+	    var match = inArray('options.default', props)
+	    if (match !== 0){
+	      var key = Object.keys(match)[0]
+	      var value = match[Object.keys(match)[0]]
+	      var _alias = props.columns.alias[alias],
+	      _alias = _alias.replace(key, value)
+	      return _alias;
+	    }
+	    return alias;
+	  }
+
+	  function inArray(needle, haystack){
+	    if (haystack.hasOwnProperty(needle))
+	      return haystack[needle]
+	    var _needle = needle.split('.')
+	    if (_needle.length > 1) {
+	      var match = _needle.map((key, i) => {
+	        if (haystack.hasOwnProperty(key)){
+	          haystack = haystack[key]
+	          return true;
+	        }
+	        return false;
+	      })
+	      if (match)
+	        return haystack;
+	    }
+	    return 0;
+	  }
+
+	  function lc(s){
+	    return s.toString().toLowerCase();
+	  }
+
+	}
+
+	module.exports = Consume;
+
+
+/***/ },
+/* 17 */
+/***/ function(module, exports) {
+
 	/*
 	 * Navbar with Dropdown
 	 */
@@ -2488,7 +2657,7 @@
 
 
 /***/ },
-/* 17 */
+/* 18 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -2551,7 +2720,7 @@
 
 
 /***/ },
-/* 18 */
+/* 19 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var React = __webpack_require__(1),
@@ -2615,15 +2784,19 @@
 
 
 /***/ },
-/* 19 */
+/* 20 */
 /***/ function(module, exports, __webpack_require__) {
 
 	 var React = __webpack_require__(1),
 	  ReactDOM = __webpack_require__(2),
 	     Table = ReactBootstrap.Table,
-	      Head = __webpack_require__(20),
-	      Body = __webpack_require__(22);
+	      Head = __webpack_require__(21),
+	      Body = __webpack_require__(23);
 
+	      // <Body
+	      //   rows={this.props.data.rows}
+	      //   order={this.state.order}
+	      //   filter={this.props.filter} />
 
 	var DataTable = React.createClass({displayName: "DataTable",
 
@@ -2639,22 +2812,16 @@
 	  },
 
 	  render: function(){
-	    var columns = this.columns(this.props),
-	      rows = this.rows(this.props);
-	    return (
-	      React.createElement(Table, {striped: true, bordered: true, hover: true}, 
-	        React.createElement(Head, {
-	          click: this.handleClick, 
-	          resize: this.resize, 
-	          columns: columns, 
-	          mouseMove: this.mouseMove}), 
-	        React.createElement(Body, {
-	          rows: rows, 
-	          filter: this.props.filter, 
-	          columns: columns, 
-	          order: this.state.order})
+	      return (
+	        React.createElement(Table, {striped: true, bordered: true, hover: true}, 
+	          React.createElement(Head, {
+	            resize: this.resize, 
+	            columns: this.props.data.columns, 
+	            click: this.handleClick, 
+	            mouseMove: this.mouseMove})
+
+	        )
 	      )
-	    )
 	  },
 
 	  handleClick: function(prop, e){
@@ -2699,121 +2866,17 @@
 	      this.state._resizeCol.style.left = e.pageX - 15 + 'px'
 	  },
 
-	  columns: function(props){
-	    if (typeof props.head.columns == "undefined")
-	      return {
-	        keys: Object.keys(props.rows[0])
-	      }
-	    var columns = props.head.columns
-	    columns.keys = Object.keys(props.rows[0])
-	    if (columns.alias) {
-	      for(var alias in columns.alias){
-	        var _alias = this._alias(alias, props.head)
-	        var match = inArray(_alias, props.rows[0])
-	        if (typeof match != "undefined" && typeof match != "object") {
-	          columns.keys.push(alias)
-	          if (lc(columns.keys).indexOf(columns.alias[alias]) > -1)
-	            columns.keys.splice(columns.keys.indexOf(columns.alias[alias]), 1)
-	        }
-	      }
-	    }
-	    if (columns.ignore) {
-	      columns.ignore.map((column) => {
-	        if (columns.keys.indexOf(column) > -1)
-	          columns.keys.splice(columns.keys.indexOf(column), 1)
-	      })
-	    }
-	    if (columns.order) {
-	      var order = columns.order
-	      columns.order.filter((key) => {
-	        if (columns.keys.indexOf(lc(key)) < 0) {
-	          order.splice(order.indexOf(key), 1)
-	        }
-	      })
-	      columns.keys.map((column) => {
-	        if (lc(order).indexOf(column) < 0) {
-	          order.push(column)
-	        }
-	      })
-	      columns.keys = columns.order
-	    }
-	    return columns;
-	  },
-
-	  rows: function(props){
-	    if (typeof props.head.columns == "undefined")
-	      return props.rows
-	    var columns = props.head.columns
-	    var _rows = props.rows.filter((row, i) => {
-	      if (columns.alias) {
-	        for(var alias in columns.alias){
-	          var _alias = this._alias(alias, props.head)
-	          var match = inArray(_alias, row)
-	          if (match !== 0) {
-	            row[alias] = match || ''
-	          }
-	        }
-	      }
-	      return row;
-	    })
-	    return _rows;
-	  },
-
-	  _alias: function(alias, props){
-	    if (this.props.option) {
-	      for(var prop in this.props.option)
-	        props.options.default[prop] = this.props.option[prop]
-	    }
-	    var match = inArray('options.default', props)
-	    if (match !== 0){
-	      var key = Object.keys(match)[0]
-	      var value = match[Object.keys(match)[0]]
-	      var _alias = props.columns.alias[alias],
-	      _alias = _alias.replace(key, value)
-	      return _alias;
-	    }
-	    return alias;
-	  }
-
 	})
-
-	function inArray(needle, haystack){
-	  if (haystack.hasOwnProperty(needle))
-	    return haystack[needle]
-	  var _needle = needle.split('.')
-	  if (_needle.length > 1) {
-	    var match = _needle.map((key, i) => {
-	      if (haystack.hasOwnProperty(key)){
-	        haystack = haystack[key]
-	        return true;
-	      }
-	      return false;
-	    })
-	    if (match)
-	      return haystack;
-	  }
-	  return 0;
-	}
-
-
-	function lc(s){
-	  return s.toString().toLowerCase();
-	}
-
-	function has(needle, haystack){
-	  console.log("Looking for ", needle, 'in', haystack);
-	}
-
 
 	module.exports = DataTable;
 
 
 /***/ },
-/* 20 */
+/* 21 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var React = __webpack_require__(1),
-	   Header = __webpack_require__(21);
+	   Header = __webpack_require__(22);
 
 	var Head = React.createClass({displayName: "Head",
 	  render: function(){
@@ -2829,7 +2892,7 @@
 
 
 /***/ },
-/* 21 */
+/* 22 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var React = __webpack_require__(1);
@@ -2859,11 +2922,11 @@
 
 
 /***/ },
-/* 22 */
+/* 23 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var React = __webpack_require__(1),
-	      Row = __webpack_require__(23);
+	      Row = __webpack_require__(24);
 
 	var Body = React.createClass({displayName: "Body",
 
@@ -2883,12 +2946,12 @@
 	  render: function(){
 	    return (
 	      React.createElement("tbody", null, 
-	        this._rows(this.props)
+	        this.rows(this.props)
 	      )
 	    )
 	  },
 
-	  _rows: function(props){
+	  rows: function(props){
 	    return this.order(props).map(function(row, i){
 	      if (this.valid(row))
 	        return (
@@ -2930,7 +2993,7 @@
 
 
 /***/ },
-/* 23 */
+/* 24 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var React = __webpack_require__(1);

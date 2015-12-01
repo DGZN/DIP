@@ -1,30 +1,18 @@
 var React = require('react');
 var ReactDOM = require('react-dom');
 var Faker = require('faker');
+var Consume = require('../../lib/consume');
 var NavBar = require('./navBar.js');
 var SlideMenu = require('./menu.js');
 var SearchBar = require('./components/searchbar');
 var DataTable = require('./components/datatable');
 
-// var routes = [{
-//   name: 'Oscars'
-// , endpoint: 'http://api.opendev.oscars.org/v1/assets/films?!fields=last_watched,guid,slug,resume'
-// , columns: {
-//       ignore: ['poster']
-//     }
-// },{
-//   name: 'Analytics'
-// , endpoint: 'http://api.opendev.oscars.org/v1/analytics/traces'
-// , columns: {
-//     ignore: ['name', 'type', 'os', 'browser', 'language', 'events']
-//   }
-// }];
 
 function fakeRows(){
   var rows = []
-  while(rows.length < 100)
+  while(rows.length < 1000)
     rows.push({
-      id:    Faker.random.number(3)
+      id:    Faker.random.number(999)
     , name:  Faker.Name.findName()
     , email: Faker.Internet.email()
     , city:  Faker.Address.city()
@@ -45,6 +33,12 @@ var options = {
 }
 
 var routes = [{
+    name: 'AMPAS'
+  , endpoint: 'http://api.opendev.oscars.org/v1/assets/films'
+  , columns: {
+      ignore:  ['poster', 'resume', 'last_watched']
+    }
+  },{
     name: 'Series'
   , endpoint: 'http://localhost:8000/v1/assets/series'
   , columns: {
@@ -132,7 +126,20 @@ var routes = [{
     }
 }];
 
+// <SearchBar
+//   onSelect={this.select}
+//   onChange={this.filter}
+//   routes={routes}
+//   filter={this.state.filter}
+//   _select={this.state._select || ''}
+//   selected={this.state.selected} />
+// <DataTable
+//   filter={this.state.filter}
+//   option={this.state.option}
+//   data={this.state.data || Consume(fakeRows())} />
+
 var App = React.createClass({
+
 
   getInitialState: function(){
     return {
@@ -148,7 +155,6 @@ var App = React.createClass({
       <div>
         <NavBar />
         <div className="container-fluid">
-          <SlideMenu />
           <div id="left" className="col-md-12">
             <SearchBar
               onSelect={this.select}
@@ -158,11 +164,9 @@ var App = React.createClass({
               _select={this.state._select || ''}
               selected={this.state.selected} />
             <DataTable
-              ref="datatable"
               filter={this.state.filter}
               option={this.state.option}
-              head={this.state.selected}
-              rows={this.state.rows || fakeRows()} />
+              data={this.state.rows || fakeRows()} />
           </div>
         </div>
       </div>
@@ -185,16 +189,33 @@ var App = React.createClass({
   fetch: function(route){
     $.get(route.endpoint, function(result) {
       route.options = options
-      this.setState({
-        rows: result
-      , filter: ''
-      , selected: route
-    });
+
+      // this.setState({
+      //   rows: result
+      // , filter: ''
+      // , selected: route
+      // });
     }.bind(this));
   }
+
 });
 
 ReactDOM.render(
   <App  />,
   document.getElementById('content')
 );
+
+function getData(routes, cb){
+  if (!routes[0].hasOwnProperty('endpoint'))
+    return false;
+  var data = $.get(routes[0].endpoint)
+  data.done((data) => {
+    cb(null, data)
+  }).error(function(err){
+    cb(err)
+  })
+}
+
+function map(data){
+  console.log("mapping data", data)
+}

@@ -19,12 +19,12 @@ var Body = React.createClass({
   render: function(){
     return (
       <tbody>
-        {this._rows(this.props)}
+        {this.rows(this.props)}
       </tbody>
     )
   },
 
-  _rows: function(props){
+  rows: function(props){
     return this.order(props).map(function(row, i){
       if (this.valid(row))
         return (
