@@ -49,7 +49,6 @@ var Body = React.createClass({
 
   order: function(props){
     if (!props.order.length) return props.data.rows;
-    console.log("Ordering by", props.order)
     var rows = props.data.rows.sort(function(a, b){
       var sortProp = props.order.toLowerCase()
       return a[sortProp] > b[sortProp] ? 1 : -1;
