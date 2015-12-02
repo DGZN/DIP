@@ -29,7 +29,7 @@ var DataTable = React.createClass({
             mouseMove={this.mouseMove} />
           <Body
             data={this.props.data}
-            order={this.state.order}
+            order={!this.state.resizing ? this.state.order : ''}
             filter={this.props.filter} />
         </Table>
       )
@@ -39,12 +39,8 @@ var DataTable = React.createClass({
     if (!this.state.resizing)
       return this.setState({order: prop})
     var width = this.state._resize.scrollWidth + e.pageX - this.state._l
-    this.setState({
-      resizing: false
-    }, () => {
-      this.state._resizeCol.className = 'column-resize'
-      this.state._resize.style.width = width + 'px'
-    })
+    this.state._resizeCol.className = 'column-resize'
+    this.state._resize.style.width = width + 'px'
   },
 
   resize: function(target, e){

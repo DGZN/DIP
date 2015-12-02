@@ -2764,25 +2764,18 @@
 	            mouseMove: this.mouseMove}), 
 	          React.createElement(Body, {
 	            data: this.props.data, 
-	            order: this.state.order, 
+	            order: !this.state.resizing ? this.state.order : '', 
 	            filter: this.props.filter})
 	        )
 	      )
 	  },
 
 	  handleClick: function(prop, e){
-	    console.log("Resizing", this.state)
-	    if (!this.state.resizing){
-	      console.log("Ordering")
+	    if (!this.state.resizing)
 	      return this.setState({order: prop})
-	    }
 	    var width = this.state._resize.scrollWidth + e.pageX - this.state._l
-	    this.setState({
-	      resizing: false
-	    }, () => {
-	      this.state._resizeCol.className = 'column-resize'
-	      this.state._resize.style.width = width + 'px'
-	    })
+	    this.state._resizeCol.className = 'column-resize'
+	    this.state._resize.style.width = width + 'px'
 	  },
 
 	  resize: function(target, e){
@@ -2922,7 +2915,8 @@
 	  },
 
 	  order: function(props){
-	    if (!props.order) return props.data.rows;
+	    if (!props.order.length) return props.data.rows;
+	    console.log("Ordering by", props.order)
 	    var rows = props.data.rows.sort(function(a, b){
 	      var sortProp = props.order.toLowerCase()
 	      return a[sortProp] > b[sortProp] ? 1 : -1;
