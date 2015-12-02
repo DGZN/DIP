@@ -24,7 +24,7 @@ var SearchBar = React.createClass({
       for(var option in options){
         if (option == 'default') continue;
         if (options.default.hasOwnProperty(option))
-          var title = this.props._select.length ? this.props._select : options.default[option]
+          var title = this.props.select.length ? this.props.select : options.default[option]
         if (typeof options[option] == "object")
           for (var i in options[option]){
             if (_options.length < 1)

@@ -47,7 +47,7 @@
 	var React = __webpack_require__(1);
 	var ReactDOM = __webpack_require__(2);
 	var Faker = __webpack_require__(3);
-	var Consume = __webpack_require__(16);
+	var JSONMap = __webpack_require__(16);
 	var NavBar = __webpack_require__(17);
 	var SlideMenu = __webpack_require__(18);
 	var SearchBar = __webpack_require__(19);
@@ -58,12 +58,12 @@
 	  var rows = []
 	  while(rows.length < 1000)
 	    rows.push({
-	      id:    Faker.random.number(999)
-	    , name:  Faker.Name.findName()
-	    , email: Faker.Internet.email()
-	    , city:  Faker.Address.city()
+	      id:      Faker.random.number(999)
+	    , city:    Faker.Address.city()
+	    , name:    Faker.Name.findName()
+	    , email:   Faker.Internet.email()
+	    , slogan:  Faker.Company.catchPhrase()
 	    , company: Faker.Company.companyName()
-	    , slogan: Faker.Company.catchPhrase()
 	    })
 	  return rows;
 	}
@@ -81,12 +81,6 @@
 	}
 
 	var routes = [{
-	    name: 'AMPAS'
-	  , endpoint: 'http://api.opendev.oscars.org/v1/assets/films'
-	  , columns: {
-	      ignore:  ['poster', 'resume', 'last_watched']
-	    }
-	  },{
 	    name: 'Series'
 	  , endpoint: 'http://localhost:8000/v1/assets/series'
 	  , columns: {
@@ -200,11 +194,11 @@
 	              onChange: this.filter, 
 	              routes: routes, 
 	              filter: this.state.filter, 
-	              _select: this.state._select || '', 
+	              select: this.state._select || '', 
 	              selected: this.state.route  || ''}), 
 	            React.createElement(DataTable, {
 	              filter: this.state.filter, 
-	              data: Consume(data)})
+	              data: JSONMap(data)})
 	          )
 	        )
 	      )
@@ -2453,35 +2447,29 @@
 /***/ function(module, exports) {
 
 	
-	var Consume = function(route, options){
-	  if (!(this instanceof Consume))
-	    return new Consume(route, options)
-	  var options = options || {};
+	var JSONMap = function(data){
+	  if (!(this instanceof JSONMap))
+	    return new JSONMap(data)
 
-	  return parse(route);
+	  return parse(data);
 
-	  function parse(route){
-	    if (!route.hasOwnProperty('columns'))
-	      return {
-	        columns: columns(route, route)
-	      , rows: rows(route, route)
-	      }
-	    route.columns = columns(route, route.rows)
-	    route.rows = rows(route, route.rows);
-	    return route;
+	  function parse(data){
+	    if (!data.hasOwnProperty('columns'))
+	      return {rows: rows(data), columns: columns(data)}
+	    data.columns = columns(data);
+	    data.rows    = rows(data);
+	    return data;
 	  }
 
-	  function columns(route, data){
-	    if (typeof route.columns == "undefined")
-	      return {
-	        keys: Object.keys(data[0])
-	      }
-	    var columns = route.columns
-	    columns.keys = Object.keys(data[0])
+	  function columns(data){
+	    if (typeof data.columns == "undefined")
+	      return {keys: Object.keys(data[0])}
+	    var columns = data.columns
+	    columns.keys = Object.keys(data.rows[0])
 	    if (columns.alias) {
 	      for(var column in columns.alias){
-	        var _alias = alias(column, route)
-	        var match = inArray(_alias, data[0])
+	        var _alias = alias(column, data)
+	        var match = inArray(_alias, data.rows[0])
 	        if (typeof match != "undefined" && typeof match != "object") {
 	          columns.keys.push(column)
 	          if (lc(columns.keys).indexOf(columns.alias[column]) > -1)
@@ -2512,14 +2500,14 @@
 	    return columns;
 	  }
 
-	  function rows(route, data){
-	    if (typeof route.columns == "undefined")
-	      return data
-	    var columns = route.columns
-	    var _rows = data.filter((row, i) => {
+	  function rows(data){
+	    if (typeof data.columns == "undefined")
+	      return data;
+	    var columns = data.columns
+	    var _rows = data.rows.filter((row, i) => {
 	      if (columns.alias) {
 	        for(var column in columns.alias){
-	          var _alias = alias(column, route)
+	          var _alias = alias(column, data)
 	          var match = inArray(_alias, row)
 	          if (match !== 0) {
 	            row[column] = match || ''
@@ -2572,7 +2560,7 @@
 
 	}
 
-	module.exports = Consume;
+	module.exports = JSONMap;
 
 
 /***/ },
@@ -2707,7 +2695,7 @@
 	      for(var option in options){
 	        if (option == 'default') continue;
 	        if (options.default.hasOwnProperty(option))
-	          var title = this.props._select.length ? this.props._select : options.default[option]
+	          var title = this.props.select.length ? this.props.select : options.default[option]
 	        if (typeof options[option] == "object")
 	          for (var i in options[option]){
 	            if (_options.length < 1)
@@ -2783,10 +2771,11 @@
 	  },
 
 	  handleClick: function(prop, e){
-	    if (!this.state.resizing)
-	      return this.setState({
-	        order: prop
-	      })
+	    console.log("Resizing", this.state)
+	    if (!this.state.resizing){
+	      console.log("Ordering")
+	      return this.setState({order: prop})
+	    }
 	    var width = this.state._resize.scrollWidth + e.pageX - this.state._l
 	    this.setState({
 	      resizing: false
@@ -2804,8 +2793,8 @@
 	      }, () => {
 	        this.state._resizeCol.className = 'column-resize'
 	        this.state._resize.style.width = width + 'px'
+	        document.getElementsByTagName('thead')[0].style.cursor = "pointer"
 	      })
-	      document.getElementsByTagName('thead')[0].style.cursor = "pointer"
 	      return;
 	    }
 	    this.setState({

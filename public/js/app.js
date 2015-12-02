@@ -1,7 +1,7 @@
 var React = require('react');
 var ReactDOM = require('react-dom');
 var Faker = require('faker');
-var Consume = require('../../lib/consume');
+var JSONMap = require('../../lib/json-map');
 var NavBar = require('./navBar.js');
 var SlideMenu = require('./menu.js');
 var SearchBar = require('./components/searchbar');
@@ -12,12 +12,12 @@ function fakeRows(){
   var rows = []
   while(rows.length < 1000)
     rows.push({
-      id:    Faker.random.number(999)
-    , name:  Faker.Name.findName()
-    , email: Faker.Internet.email()
-    , city:  Faker.Address.city()
+      id:      Faker.random.number(999)
+    , city:    Faker.Address.city()
+    , name:    Faker.Name.findName()
+    , email:   Faker.Internet.email()
+    , slogan:  Faker.Company.catchPhrase()
     , company: Faker.Company.companyName()
-    , slogan: Faker.Company.catchPhrase()
     })
   return rows;
 }
@@ -35,12 +35,6 @@ var options = {
 }
 
 var routes = [{
-    name: 'AMPAS'
-  , endpoint: 'http://api.opendev.oscars.org/v1/assets/films'
-  , columns: {
-      ignore:  ['poster', 'resume', 'last_watched']
-    }
-  },{
     name: 'Series'
   , endpoint: 'http://localhost:8000/v1/assets/series'
   , columns: {
@@ -154,11 +148,11 @@ var App = React.createClass({
               onChange={this.filter}
               routes={routes}
               filter={this.state.filter}
-              _select={this.state._select || ''}
+              select={this.state._select || ''}
               selected={this.state.route  || ''} />
             <DataTable
               filter={this.state.filter}
-              data={Consume(data)} />
+              data={JSONMap(data)} />
           </div>
         </div>
       </div>
