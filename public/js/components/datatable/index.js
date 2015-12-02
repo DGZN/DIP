@@ -4,10 +4,7 @@
       Head = require('./head'),
       Body = require('./body');
 
-      // <Body
-      //   rows={this.props.data.rows}
-      //   order={this.state.order}
-      //   filter={this.props.filter} />
+
 
 var DataTable = React.createClass({
 
@@ -23,6 +20,8 @@ var DataTable = React.createClass({
   },
 
   render: function(){
+      var columns = this.props.data.columns;
+      var rows = this.props.data.rows
       return (
         <Table striped bordered hover>
           <Head
@@ -30,7 +29,10 @@ var DataTable = React.createClass({
             columns={this.props.data.columns}
             click={this.handleClick}
             mouseMove={this.mouseMove} />
-
+          <Body
+            data={this.props.data}
+            order={this.state.order}
+            filter={this.props.filter} />
         </Table>
       )
   },

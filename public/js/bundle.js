@@ -69,13 +69,15 @@
 	}
 
 	var options = {
-	  default: {
-	    language: 'en'
-	  }
-	, language: {
-	    english: 'en'
-	  , arabic:  'ar'
-	  }
+
+	    default: {
+	      language: 'en'
+	    }
+
+	  , language: {
+	      english: 'en'
+	    , arabic:  'ar'
+	    }
 	}
 
 	var routes = [{
@@ -187,27 +189,19 @@
 	var App = React.createClass({displayName: "App",
 
 	  componentWillMount: function(){
-	    getData(routes, (err, data) => {
-	      if (err)
-	        throw new Error('Error getting data', err)
-	      this.setState({
-	        rows: data
-	      }, () => {
-	        console.log("")
-	      })
-	    }).bind(this)
+	    this.fetch(routes[0])
 	  },
 
 	  getInitialState: function(){
 	    return {
-	      filter: ''
+	      option: ''
+	    , filter: ''
 	    , language: 'en'
-	    , selected: ''
-	    , option: ''
 	    }
 	  },
 
 	  render: function() {
+	    var fakeData = Consume(fakeRows(), options)
 	    return (
 	      React.createElement("div", null, 
 	        React.createElement(NavBar, null), 
@@ -219,11 +213,11 @@
 	              routes: routes, 
 	              filter: this.state.filter, 
 	              _select: this.state._select || '', 
-	              selected: this.state.selected}), 
+	              selected: this.state.route || ''}), 
 	            React.createElement(DataTable, {
 	              filter: this.state.filter, 
 	              option: this.state.option, 
-	              data: this.state.rows || fakeRows()})
+	              data: this.state.route || fakeData})
 	          )
 	        )
 	      )
@@ -244,15 +238,13 @@
 	  },
 
 	  fetch: function(route){
-	    $.get(route.endpoint, function(result) {
-	      route.options = options
-
-	      // this.setState({
-	      //   rows: result
-	      // , filter: ''
-	      // , selected: route
-	      // });
-	    }.bind(this));
+	    $.get(route.endpoint).done(function(xhr){
+	      route.rows = xhr;
+	      this.setState({
+	        route: Consume(route, options)
+	      , filter: ''
+	      })
+	    }.bind(this))
 	  }
 
 	});
@@ -2485,27 +2477,20 @@
 /***/ function(module, exports) {
 
 	
-	var Consume = function(route, options, cb){
+	var Consume = function(route, options){
 	  if (!(this instanceof Consume))
-	    return new Consume(route, options, cb)
-	  var options = options      || {}
-	    , route   = parse(route, cb) || {};
+	    return new Consume(route, options)
+	  return parse(route);
 
 	  function parse(route){
-	    if (!route.hasOwnProperty('endpoint'))
+	    if (!route.hasOwnProperty('columns'))
 	      return {
 	        columns: columns(route, route)
 	      , rows: rows(route, route)
 	      }
-	    return fetch(route, cb);
-	  }
-
-	  function fetch(route, cb){
-	    $.get(route.endpoint).done(function(xhr){
-	      route.columns = columns(route, xhr)
-	    , route.rows = rows(route, xhr);
-	      cb(route)
-	    })
+	    route.columns = columns(route, route.rows)
+	    route.rows = rows(route, route.rows);
+	    return route;
 	  }
 
 	  function columns(route, data){
@@ -2793,10 +2778,7 @@
 	      Head = __webpack_require__(21),
 	      Body = __webpack_require__(23);
 
-	      // <Body
-	      //   rows={this.props.data.rows}
-	      //   order={this.state.order}
-	      //   filter={this.props.filter} />
+
 
 	var DataTable = React.createClass({displayName: "DataTable",
 
@@ -2812,14 +2794,19 @@
 	  },
 
 	  render: function(){
+	      var columns = this.props.data.columns;
+	      var rows = this.props.data.rows
 	      return (
 	        React.createElement(Table, {striped: true, bordered: true, hover: true}, 
 	          React.createElement(Head, {
 	            resize: this.resize, 
 	            columns: this.props.data.columns, 
 	            click: this.handleClick, 
-	            mouseMove: this.mouseMove})
-
+	            mouseMove: this.mouseMove}), 
+	          React.createElement(Body, {
+	            data: this.props.data, 
+	            order: this.state.order, 
+	            filter: this.props.filter})
 	        )
 	      )
 	  },
@@ -2946,7 +2933,7 @@
 	  render: function(){
 	    return (
 	      React.createElement("tbody", null, 
-	        this.rows(this.props)
+	        this.rows(this.props.data)
 	      )
 	    )
 	  },

@@ -23,13 +23,15 @@ function fakeRows(){
 }
 
 var options = {
-  default: {
-    language: 'en'
-  }
-, language: {
-    english: 'en'
-  , arabic:  'ar'
-  }
+
+    default: {
+      language: 'en'
+    }
+
+  , language: {
+      english: 'en'
+    , arabic:  'ar'
+    }
 }
 
 var routes = [{
@@ -140,17 +142,20 @@ var routes = [{
 
 var App = React.createClass({
 
+  componentWillMount: function(){
+    this.fetch(routes[0])
+  },
 
   getInitialState: function(){
     return {
-      filter: ''
+      option: ''
+    , filter: ''
     , language: 'en'
-    , selected: ''
-    , option: ''
     }
   },
 
   render: function() {
+    var fakeData = Consume(fakeRows(), options)
     return (
       <div>
         <NavBar />
@@ -162,11 +167,11 @@ var App = React.createClass({
               routes={routes}
               filter={this.state.filter}
               _select={this.state._select || ''}
-              selected={this.state.selected} />
+              selected={this.state.route || ''} />
             <DataTable
               filter={this.state.filter}
               option={this.state.option}
-              data={this.state.rows || fakeRows()} />
+              data={this.state.route || fakeData} />
           </div>
         </div>
       </div>
@@ -187,15 +192,13 @@ var App = React.createClass({
   },
 
   fetch: function(route){
-    $.get(route.endpoint, function(result) {
-      route.options = options
-
-      // this.setState({
-      //   rows: result
-      // , filter: ''
-      // , selected: route
-      // });
-    }.bind(this));
+    $.get(route.endpoint).done(function(xhr){
+      route.rows = xhr;
+      this.setState({
+        route: Consume(route, options)
+      , filter: ''
+      })
+    }.bind(this))
   }
 
 });

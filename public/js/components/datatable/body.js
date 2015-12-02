@@ -19,7 +19,7 @@ var Body = React.createClass({
   render: function(){
     return (
       <tbody>
-        {this.rows(this.props)}
+        {this.rows(this.props.data)}
       </tbody>
     )
   },
