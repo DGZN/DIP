@@ -157,6 +157,7 @@
 	    , alias: {
 	        name: 'meta.language.name'
 	      , video: 'video_url'
+	      , year: 'production_year'
 	      }
 	    }
 	  },{
@@ -184,12 +185,11 @@
 	    return {
 	      option: ''
 	    , filter: ''
-	    , language: 'en'
 	    }
 	  },
 
 	  render: function() {
-	    var fakeData = Consume(fakeRows(), options)
+	    var data = this.state.route || fakeRows()
 	    return (
 	      React.createElement("div", null, 
 	        React.createElement(NavBar, null), 
@@ -204,8 +204,7 @@
 	              selected: this.state.route  || ''}), 
 	            React.createElement(DataTable, {
 	              filter: this.state.filter, 
-	              option: this.state.option, 
-	              data: this.state.route || fakeData})
+	              data: Consume(data)})
 	          )
 	        )
 	      )
@@ -219,8 +218,10 @@
 	  select: function(target, e){
 	    if (target.type == "route")
 	      return this.fetch(target[target.type])
+	    var route = this.state.route
+	    route[target.type] = target[target.type]
 	    this.setState({
-	      [target.type]: target[target.type]
+	      route: route
 	    , _select: target[target.type][Object.keys(target[target.type])[0]]
 	    })
 	  },
@@ -228,8 +229,10 @@
 	  fetch: function(route){
 	    $.get(route.endpoint).done(function(xhr){
 	      route.rows = xhr;
+	      route.options = options
+	      route.option = this.state.option
 	      this.setState({
-	        route: Consume(route, options)
+	        route: route
 	      , filter: ''
 	      })
 	    }.bind(this))
@@ -2453,6 +2456,8 @@
 	var Consume = function(route, options){
 	  if (!(this instanceof Consume))
 	    return new Consume(route, options)
+	  var options = options || {};
+
 	  return parse(route);
 
 	  function parse(route){
@@ -2474,13 +2479,13 @@
 	    var columns = route.columns
 	    columns.keys = Object.keys(data[0])
 	    if (columns.alias) {
-	      for(var alias in columns.alias){
-	        var _alias = this._alias(alias, route)
+	      for(var column in columns.alias){
+	        var _alias = alias(column, route)
 	        var match = inArray(_alias, data[0])
 	        if (typeof match != "undefined" && typeof match != "object") {
-	          columns.keys.push(alias)
-	          if (lc(columns.keys).indexOf(columns.alias[alias]) > -1)
-	            columns.keys.splice(columns.keys.indexOf(columns.alias[alias]), 1)
+	          columns.keys.push(column)
+	          if (lc(columns.keys).indexOf(columns.alias[column]) > -1)
+	            columns.keys.splice(columns.keys.indexOf(columns.alias[column]), 1)
 	        }
 	      }
 	    }
@@ -2512,18 +2517,12 @@
 	      return data
 	    var columns = route.columns
 	    var _rows = data.filter((row, i) => {
-	      if (columns.ignore) {
-	        for (var key in row) {
-	          if (columns.ignore.indexOf(key) > -1)
-	            delete row[key]
-	        }
-	      }
 	      if (columns.alias) {
-	        for(var alias in columns.alias){
-	          var _alias = this._alias(alias, route)
+	        for(var column in columns.alias){
+	          var _alias = alias(column, route)
 	          var match = inArray(_alias, row)
 	          if (match !== 0) {
-	            row[alias] = match || ''
+	            row[column] = match || ''
 	          }
 	        }
 	      }
@@ -2533,9 +2532,10 @@
 	  }
 
 	  function alias(alias, props){
-	    if (this.props.option) {
-	      for(var prop in this.props.option)
-	        props.options.default[prop] = this.props.option[prop]
+	    if (props.option) {
+	      for(var prop in props.option){
+	        props.options.default[prop] = props.option[prop]
+	      }
 	    }
 	    var match = inArray('options.default', props)
 	    if (match !== 0){
@@ -2767,8 +2767,6 @@
 	  },
 
 	  render: function(){
-	      var columns = this.props.data.columns;
-	      var rows = this.props.data.rows
 	      return (
 	        React.createElement(Table, {striped: true, bordered: true, hover: true}, 
 	          React.createElement(Head, {

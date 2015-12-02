@@ -20,8 +20,6 @@ var DataTable = React.createClass({
   },
 
   render: function(){
-      var columns = this.props.data.columns;
-      var rows = this.props.data.rows
       return (
         <Table striped bordered hover>
           <Head
