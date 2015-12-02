@@ -174,18 +174,6 @@
 	    }
 	}];
 
-	// <SearchBar
-	//   onSelect={this.select}
-	//   onChange={this.filter}
-	//   routes={routes}
-	//   filter={this.state.filter}
-	//   _select={this.state._select || ''}
-	//   selected={this.state.selected} />
-	// <DataTable
-	//   filter={this.state.filter}
-	//   option={this.state.option}
-	//   data={this.state.data || Consume(fakeRows())} />
-
 	var App = React.createClass({displayName: "App",
 
 	  componentWillMount: function(){
@@ -213,7 +201,7 @@
 	              routes: routes, 
 	              filter: this.state.filter, 
 	              _select: this.state._select || '', 
-	              selected: this.state.route || ''}), 
+	              selected: this.state.route  || ''}), 
 	            React.createElement(DataTable, {
 	              filter: this.state.filter, 
 	              option: this.state.option, 
@@ -253,21 +241,6 @@
 	  React.createElement(App, null),
 	  document.getElementById('content')
 	);
-
-	function getData(routes, cb){
-	  if (!routes[0].hasOwnProperty('endpoint'))
-	    return false;
-	  var data = $.get(routes[0].endpoint)
-	  data.done((data) => {
-	    cb(null, data)
-	  }).error(function(err){
-	    cb(err)
-	  })
-	}
-
-	function map(data){
-	  console.log("mapping data", data)
-	}
 
 
 /***/ },
@@ -2933,7 +2906,7 @@
 	  render: function(){
 	    return (
 	      React.createElement("tbody", null, 
-	        this.rows(this.props.data)
+	        this.rows(this.props)
 	      )
 	    )
 	  },
@@ -2945,7 +2918,7 @@
 	          React.createElement(Row, {
 	            key: i, 
 	            index: i + 1, 
-	            columns: props.columns, 
+	            columns: props.data.columns, 
 	            data: row, 
 	            highlight: this.props.filter})
 	        )
@@ -2962,8 +2935,8 @@
 	  },
 
 	  order: function(props){
-	    if (!props.order) return props.rows;
-	    var rows = props.rows.sort(function(a, b){
+	    if (!props.order) return props.data.rows;
+	    var rows = props.data.rows.sort(function(a, b){
 	      var sortProp = props.order.toLowerCase()
 	      return a[sortProp] > b[sortProp] ? 1 : -1;
 	    });

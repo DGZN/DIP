@@ -128,18 +128,6 @@ var routes = [{
     }
 }];
 
-// <SearchBar
-//   onSelect={this.select}
-//   onChange={this.filter}
-//   routes={routes}
-//   filter={this.state.filter}
-//   _select={this.state._select || ''}
-//   selected={this.state.selected} />
-// <DataTable
-//   filter={this.state.filter}
-//   option={this.state.option}
-//   data={this.state.data || Consume(fakeRows())} />
-
 var App = React.createClass({
 
   componentWillMount: function(){
@@ -167,7 +155,7 @@ var App = React.createClass({
               routes={routes}
               filter={this.state.filter}
               _select={this.state._select || ''}
-              selected={this.state.route || ''} />
+              selected={this.state.route  || ''} />
             <DataTable
               filter={this.state.filter}
               option={this.state.option}
@@ -207,18 +195,3 @@ ReactDOM.render(
   <App  />,
   document.getElementById('content')
 );
-
-function getData(routes, cb){
-  if (!routes[0].hasOwnProperty('endpoint'))
-    return false;
-  var data = $.get(routes[0].endpoint)
-  data.done((data) => {
-    cb(null, data)
-  }).error(function(err){
-    cb(err)
-  })
-}
-
-function map(data){
-  console.log("mapping data", data)
-}

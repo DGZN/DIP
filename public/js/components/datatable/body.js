@@ -19,7 +19,7 @@ var Body = React.createClass({
   render: function(){
     return (
       <tbody>
-        {this.rows(this.props.data)}
+        {this.rows(this.props)}
       </tbody>
     )
   },
@@ -31,7 +31,7 @@ var Body = React.createClass({
           <Row
             key={i}
             index={i + 1}
-            columns={props.columns}
+            columns={props.data.columns}
             data={row}
             highlight={this.props.filter} />
         )
@@ -48,8 +48,8 @@ var Body = React.createClass({
   },
 
   order: function(props){
-    if (!props.order) return props.rows;
-    var rows = props.rows.sort(function(a, b){
+    if (!props.order) return props.data.rows;
+    var rows = props.data.rows.sort(function(a, b){
       var sortProp = props.order.toLowerCase()
       return a[sortProp] > b[sortProp] ? 1 : -1;
     });
