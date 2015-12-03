@@ -179,11 +179,11 @@
 	    return {
 	      option: ''
 	    , filter: ''
+	    , data: JSONMap(fakeRows())
 	    }
 	  },
 
 	  render: function() {
-	    var data = this.state.route || fakeRows()
 	    return (
 	      React.createElement("div", null, 
 	        React.createElement(NavBar, null), 
@@ -195,10 +195,10 @@
 	              routes: routes, 
 	              filter: this.state.filter, 
 	              select: this.state._select || '', 
-	              selected: this.state.route  || ''}), 
+	              selected: this.state.data}), 
 	            React.createElement(DataTable, {
 	              filter: this.state.filter, 
-	              data: JSONMap(data)})
+	              data: this.state.data})
 	          )
 	        )
 	      )
@@ -212,10 +212,10 @@
 	  select: function(target, e){
 	    if (target.type == "route")
 	      return this.fetch(target[target.type])
-	    var route = this.state.route
-	    route[target.type] = target[target.type]
+	    var data = this.state.data
+	    data[target.type] = target[target.type]
 	    this.setState({
-	      route: route
+	      data: JSONMap(data)
 	    , _select: target[target.type][Object.keys(target[target.type])[0]]
 	    })
 	  },
@@ -226,7 +226,7 @@
 	      route.options = options
 	      route.option = this.state.option
 	      this.setState({
-	        route: route
+	        data: JSONMap(route)
 	      , filter: ''
 	      })
 	    }.bind(this))
@@ -2773,38 +2773,57 @@
 	  handleClick: function(prop, e){
 	    if (!this.state.resizing)
 	      return this.setState({order: prop})
-	    var width = this.state._resize.scrollWidth + e.pageX - this.state._l
-	    this.state._resizeCol.className = 'column-resize'
-	    this.state._resize.style.width = width + 'px'
+	    this._setClassName(this.state._resizeCol, 'column-resize')
+	    this._setWidth(this.state._resize, e.pageX)
+
 	  },
 
 	  resize: function(target, e){
+	    var pageX = e.pageX;
 	    if (this.state.resizing){
-	      var width = this.state._resize.scrollWidth + e.pageX - this.state._l
-	      this.setState({
-	        resizing: false
-	      }, () => {
-	        this.state._resizeCol.className = 'column-resize'
-	        this.state._resize.style.width = width + 'px'
-	        document.getElementsByTagName('thead')[0].style.cursor = "pointer"
+	      this.setState({resizing: false}, () => {
+	        this._setClassName(this.state._resizeCol, 'column-resize')
+	        this._setWidth(this.state._resize, pageX)
+	        this._setCursor('thead', 'pointer')
 	      })
 	      return;
 	    }
 	    this.setState({
-	      _l: e.pageX
-	    , _resize: document.getElementById(target)
-	    , _resizeCol: e.target
+	      _l: pageX
 	    , resizing: true
+	    , _resizeCol: e.target
+	    , _resize: this._byID(target)
 	    })
-	    e.target.style.left = e.PageX  - 15 + 'px'
-	    e.target.className = 'header-resize'
-	    document.getElementsByTagName('thead')[0].style.cursor = "col-resize"
+	    this._setLeft(e.target, pageX  - 15 )
+	    this._setClassName(e.target, 'header-resize')
+	    this._setCursor('thead', 'col-resize')
 	  },
 
 	  mouseMove: function(e){
 	    if (this.state.resizing)
 	      this.state._resizeCol.style.left = e.pageX - 15 + 'px'
 	  },
+
+	  _setWidth: function(item, pageX){
+	    var width = this.state._resize.scrollWidth + pageX - this.state._l
+	    item.style.width = width + 'px'
+	  },
+
+	  _setLeft: function(item, left){
+	    item.style.left = left + 'px'
+	  },
+
+	  _setClassName: function(item, className){
+	    item.className = className
+	  },
+
+	  _byID: function(id){
+	    return document.getElementById(id);
+	  },
+
+	  _setCursor: function(selector, cursor){
+	    document.getElementsByTagName(selector)[0].style.cursor = cursor;
+	  }
 
 	})
 
@@ -2916,7 +2935,6 @@
 
 	  order: function(props){
 	    if (!props.order.length) return props.data.rows;
-	    console.log("Ordering by", props.order)
 	    var rows = props.data.rows.sort(function(a, b){
 	      var sortProp = props.order.toLowerCase()
 	      return a[sortProp] > b[sortProp] ? 1 : -1;

@@ -133,11 +133,11 @@ var App = React.createClass({
     return {
       option: ''
     , filter: ''
+    , data: JSONMap(fakeRows())
     }
   },
 
   render: function() {
-    var data = this.state.route || fakeRows()
     return (
       <div>
         <NavBar />
@@ -149,10 +149,10 @@ var App = React.createClass({
               routes={routes}
               filter={this.state.filter}
               select={this.state._select || ''}
-              selected={this.state.route  || ''} />
+              selected={this.state.data} />
             <DataTable
               filter={this.state.filter}
-              data={JSONMap(data)} />
+              data={this.state.data} />
           </div>
         </div>
       </div>
@@ -166,10 +166,10 @@ var App = React.createClass({
   select: function(target, e){
     if (target.type == "route")
       return this.fetch(target[target.type])
-    var route = this.state.route
-    route[target.type] = target[target.type]
+    var data = this.state.data
+    data[target.type] = target[target.type]
     this.setState({
-      route: route
+      data: JSONMap(data)
     , _select: target[target.type][Object.keys(target[target.type])[0]]
     })
   },
@@ -180,7 +180,7 @@ var App = React.createClass({
       route.options = options
       route.option = this.state.option
       this.setState({
-        route: route
+        data: JSONMap(route)
       , filter: ''
       })
     }.bind(this))
