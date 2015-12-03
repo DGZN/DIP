@@ -30,9 +30,9 @@ var Body = React.createClass({
         return (
           <Row
             key={i}
+            data={row}
             index={i + 1}
             columns={props.data.columns}
-            data={row}
             highlight={this.props.filter} />
         )
     }.bind(this))

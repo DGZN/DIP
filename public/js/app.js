@@ -148,7 +148,7 @@ var App = React.createClass({
               onChange={this.filter}
               data={routes}
               filter={this.state.filter}
-              select={this.state._select || ''}
+              active={this.state.active || ''}
               selected={this.state.data} />
             <DataTable
               filter={this.state.filter}
@@ -170,7 +170,7 @@ var App = React.createClass({
     data[target.type] = target[target.type]
     this.setState({
       data: JSONMap(data)
-    , _select: target[target.type][Object.keys(target[target.type])[0]]
+    , active: target[target.type][Object.keys(target[target.type])[0]]
     })
   },
 

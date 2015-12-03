@@ -172,7 +172,7 @@
 	var App = React.createClass({displayName: "App",
 
 	  componentWillMount: function(){
-	    //this.fetch(routes[0])
+	    this.fetch(routes[0])
 	  },
 
 	  getInitialState: function(){
@@ -194,7 +194,7 @@
 	              onChange: this.filter, 
 	              data: routes, 
 	              filter: this.state.filter, 
-	              select: this.state._select || '', 
+	              active: this.state.active || '', 
 	              selected: this.state.data}), 
 	            React.createElement(DataTable, {
 	              filter: this.state.filter, 
@@ -216,7 +216,7 @@
 	    data[target.type] = target[target.type]
 	    this.setState({
 	      data: JSONMap(data)
-	    , _select: target[target.type][Object.keys(target[target.type])[0]]
+	    , active: target[target.type][Object.keys(target[target.type])[0]]
 	    })
 	  },
 
@@ -2684,35 +2684,76 @@
 	    }
 	  },
 	  render: function() {
-	    var dropDown = []
-	    for (var i in this.props.data) {
-	      var route = this.props.data[i]
-	      dropDown.push(React.createElement(MenuItem, {eventKey: i, key: i, onSelect: this.props.onSelect.bind(null, { type: 'route', route: route })}, route.name))
+	    var dropDown = [],
+	    props = this.props;
+	    for (var i in props.data) {
+	      var route = props.data[i]
+	      var option = {
+	        type: 'route'
+	      , route: route
+	      }
+	      dropDown.push(
+	        React.createElement(MenuItem, {
+	          key: i, 
+	          eventKey: i, 
+	          onSelect: props.onSelect.bind(null, option)}, " ", route.name
+	        ))
 	    }
-	    if (this.props.selected.options) {
-	      var options = this.props.selected.options
+	    if (props.selected.options) {
+	      var options = props.selected.options
 	      var _options = []
 	      for(var option in options){
 	        if (option == 'default') continue;
 	        if (options.default.hasOwnProperty(option))
-	          var title = this.props.select.length ? this.props.select : options.default[option]
+	          var title = props.active.length
+	            ? props.active
+	            : options.default[option]
 	        if (typeof options[option] == "object")
 	          for (var i in options[option]){
 	            if (_options.length < 1)
 	              var title = title || options[option][i]
-	            _options.push(React.createElement(MenuItem, {eventKey: i, key: i, onSelect: this.props.onSelect.bind(null, { type: 'option', option: { [option]: options[option][i] } })}, uc(options[option][i])))
+	            var _option = {
+	              type: 'option'
+	            , option: {
+	                [option]: options[option][i]
+	              }
+	            }
+	            _options.push(
+	              React.createElement(MenuItem, {
+	                key: i, 
+	                eventKey: i, 
+	                onSelect: props.onSelect.bind(null, _option)}, 
+	                uc(options[option][i])
+	              )
+	            )
 	          }
 	        var optionsDropDown = (
-	          React.createElement(DropdownButton, {title: uc(title), id: "bg-nested-options-dropdown", bsSize: "md", className: "data-table-options-dropdown"}, 
+	          React.createElement(DropdownButton, {
+	            title: uc(title), 
+	            id: "bg-nested-options-dropdown", 
+	            bsSize: "md", 
+	            className: "data-table-options-dropdown"}, 
 	            _options
-	          ))
+	          )
+	        )
 	      }
 	    }
 	    return (
 	      React.createElement("div", {className: "row table-search"}, 
 	        React.createElement("div", {className: "data-table-search-panel"}, 
-	          React.createElement("input", {ref: "filterTextInput", type: "search", autoFocus: true, className: "data-table-search-input form-control input-lg", value: this.props.filter, onChange: this.props.onChange, placeholder: "Search...", "aria-describedby": "sizing-addon1"}), 
-	          React.createElement(DropdownButton, {title: this.props.selected.name || 'Schemas', id: "bg-nested-dropdown", bsSize: "lg", className: "data-table-filter-dropdown"}, 
+	          React.createElement("input", {
+	            autoFocus: true, 
+	            type: "search", 
+	            ref: "filterTextInput", 
+	            value: props.filter, onChange: props.onChange, 
+	            placeholder: "Search...", "aria-describedby": "sizing-addon1", 
+	            className: "data-table-search-input form-control input-lg"}
+	          ), 
+	          React.createElement(DropdownButton, {
+	            title: props.selected.name || 'Schemas', 
+	            id: "bg-nested-dropdown", 
+	            bsSize: "lg", 
+	            className: "data-table-filter-dropdown"}, 
 	            dropDown
 	          ), 
 	          optionsDropDown
@@ -2916,9 +2957,9 @@
 	        return (
 	          React.createElement(Row, {
 	            key: i, 
+	            data: row, 
 	            index: i + 1, 
 	            columns: props.data.columns, 
-	            data: row, 
 	            highlight: this.props.filter})
 	        )
 	    }.bind(this))
