@@ -51,9 +51,10 @@ var Body = React.createClass({
     if (!props.order.length) return props.data.rows;
     var rows = props.data.rows.sort(function(a, b){
       var sortProp = props.order.toLowerCase()
-      if (!isNaN(a[sortProp]))
+      if (isNaN(a[sortProp])){
         return a[sortProp] > b[sortProp] ? 1 : -1;
-      return a[sortProp] - b[sortProp];
+      }
+      return parseInt(b[sortProp]) - parseInt(a[sortProp]);
     });
     return this.state.reverse ? rows.reverse() : rows;
   }

@@ -2800,13 +2800,13 @@
 	        React.createElement(Table, {striped: true, bordered: true, hover: true}, 
 	          React.createElement(Head, {
 	            resize: this.resize, 
-	            columns: this.props.data.columns, 
 	            click: this.handleClick, 
-	            mouseMove: this.mouseMove}), 
+	            mouseMove: this.mouseMove, 
+	            columns: this.props.data.columns}), 
 	          React.createElement(Body, {
 	            data: this.props.data, 
-	            order: !this.state.resizing ? this.state.order : '', 
-	            filter: this.props.filter})
+	            filter: this.props.filter, 
+	            order: !this.state.resizing ? this.state.order : ''})
 	        )
 	      )
 	  },
@@ -2816,7 +2816,6 @@
 	      return this.setState({order: prop})
 	    this._setClassName(this.state._resizeCol, 'column-resize')
 	    this._setWidth(this.state._resize, e.pageX)
-
 	  },
 
 	  resize: function(target, e){
@@ -2830,7 +2829,7 @@
 	      return;
 	    }
 	    this.setState({
-	      _l: pageX
+	      _left: pageX
 	    , resizing: true
 	    , _resizeCol: e.target
 	    , _resize: this._byID(target)
@@ -2846,7 +2845,7 @@
 	  },
 
 	  _setWidth: function(item, pageX){
-	    var width = this.state._resize.scrollWidth + pageX - this.state._l
+	    var width = this.state._resize.scrollWidth + pageX - this.state._left
 	    item.style.width = width + 'px'
 	  },
 
@@ -2978,9 +2977,10 @@
 	    if (!props.order.length) return props.data.rows;
 	    var rows = props.data.rows.sort(function(a, b){
 	      var sortProp = props.order.toLowerCase()
-	      if (!isNaN(a[sortProp]))
+	      if (isNaN(a[sortProp])){
 	        return a[sortProp] > b[sortProp] ? 1 : -1;
-	      return a[sortProp] - b[sortProp];
+	      }
+	      return parseInt(b[sortProp]) - parseInt(a[sortProp]);
 	    });
 	    return this.state.reverse ? rows.reverse() : rows;
 	  }
