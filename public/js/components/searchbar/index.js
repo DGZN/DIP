@@ -13,10 +13,10 @@ var SearchBar = React.createClass({
     }
   },
   render: function() {
-    var _routes = []
-    for (var i in this.props.routes) {
-      var route = this.props.routes[i]
-      _routes.push(<MenuItem eventKey={i} key={i} onSelect={this.props.onSelect.bind(null, { type: 'route', route: route })}>{route.name}</MenuItem>)
+    var dropDown = []
+    for (var i in this.props.data) {
+      var route = this.props.data[i]
+      dropDown.push(<MenuItem eventKey={i} key={i} onSelect={this.props.onSelect.bind(null, { type: 'route', route: route })}>{route.name}</MenuItem>)
     }
     if (this.props.selected.options) {
       var options = this.props.selected.options
@@ -41,8 +41,8 @@ var SearchBar = React.createClass({
       <div className="row table-search">
         <div className="data-table-search-panel">
           <input ref="filterTextInput" type="search" autoFocus className="data-table-search-input form-control input-lg" value={this.props.filter} onChange={this.props.onChange} placeholder="Search..." aria-describedby="sizing-addon1"></input>
-          <DropdownButton title={this.props.selected.name || 'Routes'} id="bg-nested-dropdown" bsSize="lg" className="data-table-filter-dropdown" >
-            {_routes}
+          <DropdownButton title={this.props.selected.name || 'Schemas'} id="bg-nested-dropdown" bsSize="lg" className="data-table-filter-dropdown" >
+            {dropDown}
           </DropdownButton>
           {optionsDropDown}
         </div>

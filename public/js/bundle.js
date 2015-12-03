@@ -172,7 +172,7 @@
 	var App = React.createClass({displayName: "App",
 
 	  componentWillMount: function(){
-	    this.fetch(routes[0])
+	    //this.fetch(routes[0])
 	  },
 
 	  getInitialState: function(){
@@ -192,7 +192,7 @@
 	            React.createElement(SearchBar, {
 	              onSelect: this.select, 
 	              onChange: this.filter, 
-	              routes: routes, 
+	              data: routes, 
 	              filter: this.state.filter, 
 	              select: this.state._select || '', 
 	              selected: this.state.data}), 
@@ -2684,10 +2684,10 @@
 	    }
 	  },
 	  render: function() {
-	    var _routes = []
-	    for (var i in this.props.routes) {
-	      var route = this.props.routes[i]
-	      _routes.push(React.createElement(MenuItem, {eventKey: i, key: i, onSelect: this.props.onSelect.bind(null, { type: 'route', route: route })}, route.name))
+	    var dropDown = []
+	    for (var i in this.props.data) {
+	      var route = this.props.data[i]
+	      dropDown.push(React.createElement(MenuItem, {eventKey: i, key: i, onSelect: this.props.onSelect.bind(null, { type: 'route', route: route })}, route.name))
 	    }
 	    if (this.props.selected.options) {
 	      var options = this.props.selected.options
@@ -2712,8 +2712,8 @@
 	      React.createElement("div", {className: "row table-search"}, 
 	        React.createElement("div", {className: "data-table-search-panel"}, 
 	          React.createElement("input", {ref: "filterTextInput", type: "search", autoFocus: true, className: "data-table-search-input form-control input-lg", value: this.props.filter, onChange: this.props.onChange, placeholder: "Search...", "aria-describedby": "sizing-addon1"}), 
-	          React.createElement(DropdownButton, {title: this.props.selected.name || 'Routes', id: "bg-nested-dropdown", bsSize: "lg", className: "data-table-filter-dropdown"}, 
-	            _routes
+	          React.createElement(DropdownButton, {title: this.props.selected.name || 'Schemas', id: "bg-nested-dropdown", bsSize: "lg", className: "data-table-filter-dropdown"}, 
+	            dropDown
 	          ), 
 	          optionsDropDown
 	        )

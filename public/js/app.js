@@ -146,7 +146,7 @@ var App = React.createClass({
             <SearchBar
               onSelect={this.select}
               onChange={this.filter}
-              routes={routes}
+              data={routes}
               filter={this.state.filter}
               select={this.state._select || ''}
               selected={this.state.data} />
