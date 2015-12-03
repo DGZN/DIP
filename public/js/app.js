@@ -113,12 +113,12 @@ var routes = [{
   , endpoint: 'http://localhost:8000/v1/assets/plays'
   , columns: {
       ignore: ['meta', 'has_trailer']
-    , order: ['ID', 'name', 'description', 'year', 'url']
+    , order: ['ID', 'name', 'description', 'year', 'URL']
     , alias: {
       name: 'meta.language.name'
     , description: 'meta.language.description'
     , year: 'production_year'
-    , URL: 'video_url'
+    , url: 'video_url'
     }
     }
 }];
