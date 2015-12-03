@@ -172,7 +172,7 @@
 	var App = React.createClass({displayName: "App",
 
 	  componentWillMount: function(){
-	    this.fetch(routes[0])
+	    //this.fetch(routes[0])
 	  },
 
 	  getInitialState: function(){
@@ -2978,7 +2978,9 @@
 	    if (!props.order.length) return props.data.rows;
 	    var rows = props.data.rows.sort(function(a, b){
 	      var sortProp = props.order.toLowerCase()
-	      return a[sortProp] > b[sortProp] ? 1 : -1;
+	      if (!isNaN(a[sortProp]))
+	        return a[sortProp] > b[sortProp] ? 1 : -1;
+	      return a[sortProp] - b[sortProp];
 	    });
 	    return this.state.reverse ? rows.reverse() : rows;
 	  }

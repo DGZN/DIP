@@ -126,7 +126,7 @@ var routes = [{
 var App = React.createClass({
 
   componentWillMount: function(){
-    this.fetch(routes[0])
+    //this.fetch(routes[0])
   },
 
   getInitialState: function(){
